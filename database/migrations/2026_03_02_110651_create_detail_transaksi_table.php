@@ -1,0 +1,34 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+       Schema::create('detail_transaksi', function (Blueprint $table) {
+    $table->id();
+
+    // sekarang otomatis UNSIGNED BIGINT dan cocok dengan transaksi.id
+    $table->foreignId('id_transaksi')
+          ->constrained('transaksi')
+          ->onDelete('cascade');
+
+    $table->enum('tipe_item', ['Barang', 'Layanan']);
+    $table->unsignedBigInteger('id_item');
+
+    $table->decimal('harga_satuan', 10, 2);
+    $table->integer('qty');
+    $table->decimal('subtotal', 15, 2);
+
+    $table->timestamps();
+});
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('detail_transaksi');
+    }
+};
