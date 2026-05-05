@@ -15,10 +15,15 @@ class User extends Authenticatable
         'password',
         'email',
         'role',
+        'is_active',
     ];
 
     protected $hidden = [
         'password',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
     ];
 
     // Relasi: Pelanggan punya banyak pesanan online
@@ -43,5 +48,11 @@ class User extends Authenticatable
     public function pengeluaran()
     {
         return $this->hasMany(Pengeluaran::class, 'id_admin');
+    }
+
+    // Relasi: Pelanggan memiliki satu membership
+    public function membership()
+    {
+        return $this->hasOne(Membership::class, 'id_pelanggan');
     }
 }

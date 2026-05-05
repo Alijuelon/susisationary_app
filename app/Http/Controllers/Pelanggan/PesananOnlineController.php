@@ -44,14 +44,68 @@ class PesananOnlineController extends Controller
     }
 
     // Menampilkan riwayat pesanan
-    public function riwayat()
+    public function riwayat(Request $request)
     {
-        $riwayat = Pesanan::with('layanan')
-            ->where('id_pelanggan', Auth::id())
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        $search = $request->input('search');
+        $status = $request->input('status');
+        $tglMulai = $request->input('tgl_mulai');
+        $tglAkhir = $request->input('tgl_akhir');
 
-        return view('pelanggan.riwayat', compact('riwayat'));
+        $query = Pesanan::with('layanan')
+            ->where('id_pelanggan', Auth::id())
+            ->orderBy('created_at', 'desc');
+
+        if ($search) {
+            $query->whereHas('layanan', function ($q) use ($search) {
+                $q->where('nama_item', 'like', "%{$search}%");
+            })->orWhere('catatan', 'like', "%{$search}%");
+        }
+
+        if ($status && $status !== 'semua') {
+            $query->where('status', $status);
+        }
+
+        if ($tglMulai && $tglAkhir) {
+            $query->whereBetween('created_at', [$tglMulai . ' 00:00:00', $tglAkhir . ' 23:59:59']);
+        }
+
+        $riwayat = $query->paginate(10)->withQueryString();
+
+        return view('pelanggan.riwayat', compact('riwayat', 'search', 'status', 'tglMulai', 'tglAkhir'));
+    }
+
+    // Menghapus riwayat pesanan tunggal (Hanya jika masih menunggu)
+    public function destroy($id)
+    {
+        $pesanan = Pesanan::where('id_pelanggan', Auth::id())->findOrFail($id);
+        
+        if ($pesanan->status !== 'Menunggu') {
+            return redirect()->route('pelanggan.riwayat')->with('error', 'Hanya pesanan berstatus Menunggu yang dapat dibatalkan.');
+        }
+
+        $pesanan->delete();
+        return redirect()->route('pelanggan.riwayat')->with('success', 'Pesanan berhasil dibatalkan.');
+    }
+
+    // Menghapus massal riwayat pesanan (Hanya jika menunggu)
+    public function destroyBulk(Request $request)
+    {
+        $ids = $request->input('selected_ids');
+        
+        if (!$ids || count($ids) == 0) {
+            return redirect()->route('pelanggan.riwayat')->with('error', 'Belum ada pesanan yang dipilih untuk dibatalkan.');
+        }
+
+        $count = Pesanan::where('id_pelanggan', Auth::id())
+                        ->where('status', 'Menunggu')
+                        ->whereIn('id', $ids)
+                        ->delete();
+
+        if ($count > 0) {
+            return redirect()->route('pelanggan.riwayat')->with('success', $count . ' pesanan berhasil dibatalkan sekaligus.');
+        }
+
+        return redirect()->route('pelanggan.riwayat')->with('error', 'Gagal membatalkan pesanan. Pastikan pesanan yang dipilih masih berstatus Menunggu.');
     }
 
     // Menampilkan & Mencetak Struk Pesanan Online (BARU)

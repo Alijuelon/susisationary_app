@@ -12,20 +12,32 @@ class BarangController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $statusStok = $request->input('status_stok');
 
         // Query dasar
         $query = Barang::orderBy('created_at', 'desc');
 
         // Jika ada inputan pencarian
         if ($search) {
-            $query->where('nama_barang', 'like', "%{$search}%")
+            $query->where(function($q) use ($search) {
+                $q->where('nama_barang', 'like', "%{$search}%")
                   ->orWhere('kode_barang', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter Status Stok (Tersedia = stok > stok_minimum, Menipis/Habis = stok <= stok_minimum)
+        if ($statusStok && $statusStok !== 'Semua') {
+            if ($statusStok === 'Tersedia') {
+                $query->whereColumn('stok', '>', 'stok_minimum');
+            } elseif ($statusStok === 'Habis') {
+                $query->whereColumn('stok', '<=', 'stok_minimum');
+            }
         }
 
         // Pagination 10 data per halaman dan membawa parameter pencarian di URL
         $barang = $query->paginate(10)->withQueryString();
 
-        return view('admin.barang.index', compact('barang', 'search'));
+        return view('admin.barang.index', compact('barang', 'search', 'statusStok'));
     }
 
     // 2. Menyimpan data barang baru (Dari Modal Tambah)
@@ -60,10 +72,24 @@ class BarangController extends Controller
         return redirect()->route('admin.barang.index')->with('success', 'Data barang ATK berhasil diperbarui!');
     }
 
-    // 4. Menghapus data barang
+    // 4. Menghapus data barang satuan
     public function destroy(Barang $barang)
     {
         $barang->delete();
-        return redirect()->route('admin.barang.index')->with('success', 'Data barang ATK berhasil dihapus!');
+        return redirect()->back()->with('success', 'Data barang ATK berhasil dihapus!');
+    }
+
+    // 5. Menghapus massal (Bulk Delete)
+    public function destroyBulk(Request $request)
+    {
+        $ids = $request->input('selected_ids');
+        
+        if (!$ids || count($ids) == 0) {
+            return redirect()->back()->with('error', 'Belum ada data barang yang dipilih untuk dihapus.');
+        }
+
+        Barang::whereIn('id', $ids)->delete();
+
+        return redirect()->back()->with('success', count($ids) . ' data barang berhasil dihapus sekaligus.');
     }
 }

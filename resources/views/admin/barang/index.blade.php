@@ -7,6 +7,7 @@
         showDeleteModal: false,
         editItem: { id: '', kode_barang: '', nama_barang: '', harga_jual: 0, stok: 0, stok_minimum: 0 },
         deleteItem: { name: '', url: '' },
+        selectedIds: [],
         
         // Fungsi untuk membuka modal edit dan mengisi datanya
         openEditModal(item) {
@@ -27,25 +28,36 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Pantau ketersediaan dan atur harga jual produk.</p>
             </div>
             
-            <div class="flex flex-col sm:flex-row w-full md:w-auto gap-3">
-                <form action="{{ route('admin.barang.index') }}" method="GET" class="relative w-full sm:w-64">
-                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <i class="fa-solid fa-search text-gray-400 dark:text-gray-500"></i>
-                    </div>
-                    <input type="text" name="search" value="{{ $search }}" placeholder="Cari nama / kode..." 
-                           class="bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm rounded-xl focus:ring-gray-900 dark:focus:ring-white focus:border-gray-900 dark:focus:border-white block w-full pl-10 p-2.5 transition-colors">
-                    
-                    @if($search)
-                        <a href="{{ route('admin.barang.index') }}" class="absolute inset-y-0 right-0 flex items-center pr-3 text-red-500 hover:text-red-700 dark:hover:text-red-400">
-                            <i class="fa-solid fa-times"></i>
-                        </a>
-                    @endif
-                </form>
-
-                <button @click="showCreateModal = true" class="bg-gray-900 dark:bg-white text-white dark:text-slate-900 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-800 dark:hover:bg-gray-200 shadow-md transition-all flex items-center justify-center whitespace-nowrap">
+            <div>
+                <button @click="showCreateModal = true" class="bg-gray-900 dark:bg-white text-white dark:text-slate-900 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-800 dark:hover:bg-gray-200 shadow-md transition-all flex items-center justify-center whitespace-nowrap w-full md:w-auto">
                     <i class="fa-solid fa-plus mr-2"></i> Tambah Barang
                 </button>
             </div>
+        </div>
+
+        <!-- Filter Area -->
+        <div class="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl p-4 mb-6 shadow-sm">
+            <form action="{{ route('admin.barang.index') }}" method="GET" class="flex flex-wrap md:flex-nowrap gap-3 items-center w-full">
+                <div class="w-full sm:w-auto">
+                    <select name="status_stok" class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 block w-full p-2.5 dark:text-white relative z-50 appearance-auto">
+                        <option value="Semua">Semua Status Stok</option>
+                        <option value="Tersedia" {{ request('status_stok') == 'Tersedia' ? 'selected' : '' }}>Tersedia / Aman</option>
+                        <option value="Habis" {{ request('status_stok') == 'Habis' ? 'selected' : '' }}>Menipis / Habis</option>
+                    </select>
+                </div>
+                <div class="relative w-full md:flex-1">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <i class="fa-solid fa-search text-gray-400"></i>
+                    </div>
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama atau kode barang..." class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 block w-full pl-10 p-2.5 dark:text-white">
+                </div>
+                <button type="submit" class="w-full sm:w-auto bg-gray-900 dark:bg-slate-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-800 dark:hover:bg-slate-600 transition-colors shadow-sm">
+                    Filter
+                </button>
+                @if(request('search') || request('status_stok'))
+                    <a href="{{ route('admin.barang.index') }}" class="w-full sm:w-auto text-center px-4 py-2.5 text-sm font-bold text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/20 rounded-xl transition-colors">Reset</a>
+                @endif
+            </form>
         </div>
 
         @if(session('success'))
@@ -74,11 +86,38 @@
             </div>
         @endif
 
+        @if(session('error'))
+            <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" class="mb-6 bg-red-500 dark:bg-red-600 text-white px-5 py-4 rounded-xl shadow-md flex items-center justify-between transition-all">
+                <div class="flex items-center space-x-3">
+                    <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+                    <p class="font-bold text-sm">{{ session('error') }}</p>
+                </div>
+                <button @click="show = false" class="text-white hover:text-red-200"><i class="fa-solid fa-times"></i></button>
+            </div>
+        @endif
+
+        <!-- Bulk Delete Action Bar -->
+        <div x-show="selectedIds.length > 0" style="display: none;" x-transition class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-2xl p-4 mb-4 flex flex-col sm:flex-row justify-between items-center shadow-sm">
+            <div class="text-red-800 dark:text-red-400 font-bold mb-3 sm:mb-0">
+                <i class="fa-solid fa-check-double mr-2"></i> <span x-text="selectedIds.length"></span> Barang Terpilih
+            </div>
+            <button type="button" @click.prevent="if(confirm('Apakah Anda yakin ingin menghapus ' + selectedIds.length + ' data barang sekaligus? Aksi ini akan menghapus semua riwayat transaksi yang terhubung dengan barang tersebut.')) document.getElementById('bulkDeleteForm').submit();" class="bg-red-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md hover:bg-red-700 transition-colors w-full sm:w-auto">
+                <i class="fa-solid fa-trash mr-2"></i> Hapus Sekaligus
+            </button>
+        </div>
+
+        <form action="{{ route('admin.barang.destroyBulk') }}" method="POST" id="bulkDeleteForm">
+            @csrf
+            @method('DELETE')
+
         <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden mb-6 transition-colors">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-gray-50/50 dark:bg-slate-800/50 text-[11px] text-gray-400 dark:text-gray-500 uppercase tracking-wider transition-colors">
+                            <th class="px-6 py-4 font-semibold text-center w-12">
+                                <input type="checkbox" @change="selectedIds = $event.target.checked ? [{{ $barang->pluck('id')->join(',') }}] : []" :checked="selectedIds.length === {{ $barang->count() }} && {{ $barang->count() }} > 0" class="rounded border-gray-300 text-red-600 focus:ring-red-500 bg-white dark:bg-slate-900">
+                            </th>
                             <th class="px-6 py-4 font-semibold">Kode</th>
                             <th class="px-6 py-4 font-semibold">Nama Barang</th>
                             <th class="px-6 py-4 font-semibold text-right">Harga Jual</th>
@@ -89,7 +128,10 @@
                     </thead>
                     <tbody class="text-sm text-gray-600 dark:text-gray-300 divide-y divide-gray-100 dark:divide-slate-800">
                         @forelse($barang as $item)
-                            <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors {{ $item->stok <= $item->stok_minimum ? 'bg-red-50/30 dark:bg-red-900/10' : '' }}">
+                            <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors {{ $item->stok <= $item->stok_minimum ? 'bg-red-50/30 dark:bg-red-900/10' : '' }}" :class="selectedIds.includes({{ $item->id }}) ? 'bg-red-50/30 dark:bg-red-900/10' : ''">
+                                <td class="px-6 py-4 text-center">
+                                    <input type="checkbox" name="selected_ids[]" value="{{ $item->id }}" x-model="selectedIds" class="rounded border-gray-300 text-red-600 focus:ring-red-500 bg-white dark:bg-slate-900">
+                                </td>
                                 <td class="px-6 py-4 font-bold text-gray-800 dark:text-white">{{ $item->kode_barang }}</td>
                                 <td class="px-6 py-4 font-medium text-gray-800 dark:text-white">{{ $item->nama_barang }}</td>
                                 <td class="px-6 py-4 text-right">Rp {{ number_format($item->harga_jual, 0, ',', '.') }}</td>
@@ -104,22 +146,22 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-right flex justify-end space-x-2">
-                                    <button @click="openEditModal({{ json_encode($item) }})" class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-400 flex items-center justify-center hover:bg-blue-500 hover:text-white dark:hover:bg-blue-500 dark:hover:text-white transition-colors" title="Edit">
+                                    <button type="button" @click="openEditModal({{ json_encode($item) }})" class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-400 flex items-center justify-center hover:bg-blue-500 hover:text-white dark:hover:bg-blue-500 dark:hover:text-white transition-colors border border-transparent dark:border-slate-700" title="Edit">
                                         <i class="fa-solid fa-pen-to-square"></i>
                                     </button>
                                     
-                                    <button @click="openDeleteModal('{{ addslashes($item->nama_barang) }}', '{{ route('admin.barang.destroy', $item->id) }}')" class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-400 flex items-center justify-center hover:bg-red-500 hover:text-white dark:hover:bg-red-500 dark:hover:text-white transition-colors" title="Hapus">
+                                    <button type="button" @click="openDeleteModal('{{ addslashes($item->nama_barang) }}', '{{ route('admin.barang.destroy', $item->id) }}')" class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-400 flex items-center justify-center hover:bg-red-500 hover:text-white dark:hover:bg-red-500 dark:hover:text-white transition-colors border border-transparent" title="Hapus">
                                         <i class="fa-solid fa-trash"></i>
                                     </button>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="7" class="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
                                     <div class="flex flex-col items-center justify-center">
                                         <i class="fa-solid fa-box-open text-4xl mb-3 text-gray-300 dark:text-slate-600"></i>
-                                        @if($search)
-                                            <p class="font-medium text-gray-600 dark:text-gray-400">Pencarian "{{ $search }}" tidak ditemukan.</p>
+                                        @if(request('search') || request('status_stok'))
+                                            <p class="font-medium text-gray-600 dark:text-gray-400">Pencarian untuk filter ini tidak ditemukan.</p>
                                         @else
                                             <p class="font-medium text-gray-600 dark:text-gray-400">Belum ada data barang.</p>
                                         @endif
@@ -131,6 +173,7 @@
                 </table>
             </div>
         </div>
+        </form>
 
         <div class="mb-8">
             {{ $barang->links() }}

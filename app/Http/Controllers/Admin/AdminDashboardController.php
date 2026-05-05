@@ -7,6 +7,8 @@ use App\Models\Transaksi;
 use App\Models\Pengeluaran;
 use App\Models\User;
 use App\Models\Barang;
+use App\Models\Pesanan;
+use App\Models\Membership;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -28,30 +30,66 @@ class AdminDashboardController extends Controller
 
         $stokMenipis = Barang::whereColumn('stok', '<=', 'stok_minimum')->count();
 
-        // 2. DATA GRAFIK TRANSAKSI MINGGUAN (7 Hari Terakhir)
+        // Profit hari ini
+        $profitHariIni = $pemasukanHariIni - $pengeluaranHariIni;
+
+        // Member aktif
+        $totalMemberAktif = Membership::where('status', 'aktif')->count();
+
+        // 2. DATA GRAFIK TRANSAKSI MINGGUAN (7 Hari Terakhir) — Jumlah transaksi
         $transaksiMingguan = [];
-        $maxTransaksi = 0; // Untuk menentukan tinggi bar chart secara proporsional
+        $maxTransaksi = 0;
 
         for ($i = 6; $i >= 0; $i--) {
             $tanggal = Carbon::today()->subDays($i);
             $jumlahTransaksi = Transaksi::whereDate('created_at', $tanggal)->count();
             
             $transaksiMingguan[] = [
-                'hari' => $tanggal->locale('id')->translatedFormat('D'), // Nama hari (Sen, Sel, dll)
+                'hari' => $tanggal->locale('id')->translatedFormat('D'),
                 'jumlah' => $jumlahTransaksi
             ];
 
-            // Cari nilai tertinggi untuk skala grafik
             if ($jumlahTransaksi > $maxTransaksi) {
                 $maxTransaksi = $jumlahTransaksi;
             }
         }
         
-        // Mencegah pembagian dengan nol pada saat merender grafik di blade
         $maxTransaksi = $maxTransaksi == 0 ? 1 : $maxTransaksi;
 
-        // 3. RIWAYAT TRANSAKSI TERBARU (5 Transaksi Terakhir)
-        $transaksiTerbaru = Transaksi::with('kasir') // Load relasi dengan kasir
+        // 3. DATA GRAFIK REVENUE MINGGUAN (7 Hari Terakhir) — Pendapatan per hari
+        $revenueMingguan = [];
+        $maxRevenue = 0;
+
+        for ($i = 6; $i >= 0; $i--) {
+            $tanggal = Carbon::today()->subDays($i);
+            $revenue = Transaksi::whereDate('created_at', $tanggal)
+                        ->where('status', 'Berhasil')
+                        ->sum('total_harga');
+            
+            $revenueMingguan[] = [
+                'hari' => $tanggal->locale('id')->translatedFormat('D'),
+                'jumlah' => (float) $revenue,
+            ];
+
+            if ($revenue > $maxRevenue) {
+                $maxRevenue = (float) $revenue;
+            }
+        }
+
+        $maxRevenue = $maxRevenue == 0 ? 1 : $maxRevenue;
+
+        // 4. DISTRIBUSI STATUS PESANAN ONLINE
+        $pesananPerStatus = [
+            'Menunggu' => Pesanan::where('status', 'Menunggu')->count(),
+            'Diproses' => Pesanan::where('status', 'Diproses')->count(),
+            'Siap Diambil' => Pesanan::where('status', 'Siap Diambil')->count(),
+            'Selesai' => Pesanan::where('status', 'Selesai')->count(),
+            'Dibatalkan' => Pesanan::where('status', 'Dibatalkan')->count(),
+        ];
+        $totalPesanan = array_sum($pesananPerStatus);
+
+        // 5. RIWAYAT TRANSAKSI TERBARU (5 Transaksi Terakhir)
+        $transaksiTerbaru = Transaksi::with('kasir')
                             ->orderBy('created_at', 'desc')
                             ->take(5)
                             ->get();
@@ -67,8 +105,14 @@ class AdminDashboardController extends Controller
             'pengeluaranHariIni', 
             'totalPelanggan', 
             'stokMenipis',
+            'profitHariIni',
+            'totalMemberAktif',
             'transaksiMingguan',
             'maxTransaksi',
+            'revenueMingguan',
+            'maxRevenue',
+            'pesananPerStatus',
+            'totalPesanan',
             'transaksiTerbaru',
             'totalTransaksiHariIni'
         ));

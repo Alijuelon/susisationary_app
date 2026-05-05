@@ -15,11 +15,11 @@
                 <div class="w-full h-32 bg-gray-50 dark:bg-slate-800/50 rounded-lg flex items-end justify-between px-4 pb-2 pt-6 gap-3 border-b border-gray-200 dark:border-slate-700/50 transition-colors">
                     @foreach($transaksiMingguan as $grafik)
                         <div class="w-full relative group flex flex-col justify-end items-center h-full">
-                            <span class="absolute -top-6 text-[10px] font-bold hidden group-hover:block bg-gray-800 dark:bg-slate-700 text-white px-1.5 py-0.5 rounded shadow z-10">
-                                {{ $grafik['jumlah'] }}
+                            <span class="absolute -top-6 text-[10px] font-bold hidden group-hover:block bg-gray-800 dark:bg-slate-700 text-white px-1.5 py-0.5 rounded shadow z-10 w-max">
+                                {{ $grafik['jumlah'] }} Trx
                             </span>
                             
-                            <div class="w-full bg-green-500 rounded-t-sm transition-all duration-300 hover:bg-green-600 dark:hover:bg-green-400" 
+                            <div class="w-full bg-blue-500 rounded-t-sm transition-all duration-300 hover:bg-blue-600 dark:hover:bg-blue-400" 
                                  style="height: {{ ($grafik['jumlah'] / $maxTransaksi) * 100 }}%; min-height: 4px;">
                             </div>
                             
@@ -37,93 +37,168 @@
             <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm p-4 border border-gray-100 dark:border-slate-800 flex flex-col justify-between transition-colors">
                 <div>
                     <h6 class="font-bold text-gray-800 dark:text-white text-base">Tren Pendapatan</h6>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Pergerakan transaksi harian</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Omzet kotor 7 hari terakhir</p>
                 </div>
-                <div class="w-full h-32 bg-gray-50 dark:bg-slate-800/50 rounded-lg flex items-center justify-center border-b border-gray-200 dark:border-slate-700/50 transition-colors">
-                    <i class="fa-solid fa-chart-line text-5xl text-green-500 opacity-80"></i>
+
+                <div class="w-full h-32 bg-gray-50 dark:bg-slate-800/50 rounded-lg flex items-end justify-between px-4 pb-2 pt-6 gap-3 border-b border-gray-200 dark:border-slate-700/50 transition-colors">
+                    @foreach($revenueMingguan as $grafik)
+                        <div class="w-full relative group flex flex-col justify-end items-center h-full">
+                            <span class="absolute -top-6 text-[10px] font-bold hidden group-hover:block bg-gray-800 dark:bg-slate-700 text-white px-1.5 py-0.5 rounded shadow z-10 w-max">
+                                Rp {{ number_format($grafik['jumlah'], 0, ',', '.') }}
+                            </span>
+                            
+                            <div class="w-full bg-emerald-500 rounded-t-sm transition-all duration-300 hover:bg-emerald-600 dark:hover:bg-emerald-400" 
+                                 style="height: {{ ($grafik['jumlah'] / $maxRevenue) * 100 }}%; min-height: 4px;">
+                            </div>
+                            
+                            <span class="text-[9px] text-gray-400 dark:text-gray-500 mt-1 uppercase">{{ $grafik['hari'] }}</span>
+                        </div>
+                    @endforeach
                 </div>
+
                 <div class="mt-auto">
                     <hr class="my-3 border-gray-100 dark:border-slate-800">
-                    <p class="text-xs text-gray-400 dark:text-gray-500"><i class="fa-regular fa-clock mr-1"></i> Sistem Kasir Aktif</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500"><i class="fa-solid fa-chart-line text-emerald-500 mr-1"></i> Omzet Harian</p>
                 </div>
             </div>
 
             <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm p-4 border border-gray-100 dark:border-slate-800 flex flex-col justify-between transition-colors">
                 <div>
-                    <h6 class="font-bold text-gray-800 dark:text-white text-base">Pesanan Online</h6>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Performa pesanan cetak digital</p>
+                    <h6 class="font-bold text-gray-800 dark:text-white text-base">Status Pesanan Cetak</h6>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Total: {{ $totalPesanan }} pesanan online</p>
                 </div>
-                <div class="w-full h-32 bg-gray-50 dark:bg-slate-800/50 rounded-lg flex items-center justify-center border-b border-gray-200 dark:border-slate-700/50 transition-colors">
-                    <i class="fa-solid fa-print text-5xl text-gray-800 dark:text-gray-300 opacity-80"></i>
+
+                <div class="w-full h-32 bg-gray-50 dark:bg-slate-800/50 rounded-lg flex items-end justify-between px-4 pb-2 pt-6 gap-2 border-b border-gray-200 dark:border-slate-700/50 transition-colors">
+                     @php
+                         $colors = [
+                             'Menunggu' => 'bg-yellow-400',
+                             'Diproses' => 'bg-blue-400',
+                             'Siap Diambil' => 'bg-purple-400',
+                             'Selesai' => 'bg-emerald-400',
+                             'Dibatalkan' => 'bg-red-400'
+                         ];
+                         $total = $totalPesanan > 0 ? $totalPesanan : 1;
+                     @endphp
+                     @foreach($pesananPerStatus as $status => $jumlah)
+                        <div class="w-full relative group flex flex-col justify-end items-center h-full">
+                            <span class="absolute -top-6 text-[10px] font-bold hidden group-hover:block bg-gray-800 dark:bg-slate-700 text-white px-1.5 py-0.5 rounded shadow z-10 w-max">
+                                {{ $jumlah }} {{ $status }}
+                            </span>
+                            
+                            <div class="w-full {{ $colors[$status] ?? 'bg-gray-400' }} rounded-t-sm transition-all duration-300 hover:opacity-80" 
+                                 style="height: {{ ($jumlah / $total) * 100 }}%; min-height: 4px;">
+                            </div>
+                            
+                            <span class="text-[9px] text-gray-400 dark:text-gray-500 mt-1 truncate w-full text-center" title="{{ $status }}">{{ substr($status, 0, 4) }}.</span>
+                        </div>
+                     @endforeach
                 </div>
+
                 <div class="mt-auto">
                     <hr class="my-3 border-gray-100 dark:border-slate-800">
-                    <p class="text-xs text-gray-400 dark:text-gray-500"><i class="fa-solid fa-check-circle text-green-500 mr-1"></i> Terhubung dengan pelanggan</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500"><i class="fa-solid fa-print text-gray-500 mr-1"></i> Distribusi pesanan</p>
                 </div>
             </div>
 
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
             
-            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-800 transition-colors">
-                <div class="flex justify-between">
-                    <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 font-medium capitalize mb-1">Pemasukan Hari Ini</p>
-                        <h5 class="font-bold text-2xl text-gray-800 dark:text-white tracking-tight">Rp {{ number_format($pemasukanHariIni, 0, ',', '.') }}</h5>
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-800 transition-colors flex flex-col justify-between">
+                <div class="flex justify-between items-start mb-2">
+                    <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow border border-green-400/20 flex items-center justify-center text-white shrink-0">
+                        <i class="fa-solid fa-wallet text-sm"></i>
                     </div>
-                    <div class="w-12 h-12 bg-gradient-to-br from-gray-800 to-gray-900 dark:from-slate-700 dark:to-slate-800 rounded-xl shadow-md flex items-center justify-center text-white">
-                        <i class="fa-solid fa-wallet text-xl"></i>
+                    <div class="text-right">
+                        <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-1">Pemasukan</p>
+                        <h5 class="font-bold text-lg text-gray-800 dark:text-white tracking-tight">{{ number_format($pemasukanHariIni / 1000, 0, ',', '.') }}K</h5>
                     </div>
                 </div>
-                <hr class="border-gray-100 dark:border-slate-800 my-4">
-                <p class="text-sm text-gray-500 dark:text-gray-400"><i class="fa-solid fa-chart-bar text-green-500 mr-1"></i> Transaksi Kasir</p>
+                <div class="mt-auto pt-2 border-t border-gray-100 dark:border-slate-800">
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400"><i class="fa-solid fa-arrow-trend-up text-green-500 mr-1"></i> Hari ini</p>
+                </div>
             </div>
 
-            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-800 transition-colors">
-                <div class="flex justify-between">
-                    <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 font-medium capitalize mb-1">Pengeluaran Hari Ini</p>
-                        <h5 class="font-bold text-2xl text-gray-800 dark:text-white tracking-tight">Rp {{ number_format($pengeluaranHariIni, 0, ',', '.') }}</h5>
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-800 transition-colors flex flex-col justify-between">
+                <div class="flex justify-between items-start mb-2">
+                    <div class="w-10 h-10 bg-gradient-to-br from-red-500 to-rose-600 rounded-xl shadow border border-red-400/20 flex items-center justify-center text-white shrink-0">
+                        <i class="fa-solid fa-file-invoice-dollar text-sm"></i>
                     </div>
-                    <div class="w-12 h-12 bg-gradient-to-br from-gray-800 to-gray-900 dark:from-slate-700 dark:to-slate-800 rounded-xl shadow-md flex items-center justify-center text-white">
-                        <i class="fa-solid fa-file-invoice-dollar text-xl"></i>
+                    <div class="text-right">
+                        <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-1">Pengeluaran</p>
+                        <h5 class="font-bold text-lg text-gray-800 dark:text-white tracking-tight">{{ number_format($pengeluaranHariIni / 1000, 0, ',', '.') }}K</h5>
                     </div>
                 </div>
-                <hr class="border-gray-100 dark:border-slate-800 my-4">
-                <p class="text-sm text-gray-500 dark:text-gray-400"><i class="fa-solid fa-calculator text-red-500 mr-1"></i> Biaya Operasional</p>
+                <div class="mt-auto pt-2 border-t border-gray-100 dark:border-slate-800">
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400"><i class="fa-solid fa-calculator text-red-500 mr-1"></i> Hari ini</p>
+                </div>
             </div>
 
-            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-800 transition-colors">
-                <div class="flex justify-between">
-                    <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 font-medium capitalize mb-1">Total Pelanggan</p>
-                        <h5 class="font-bold text-2xl text-gray-800 dark:text-white tracking-tight">{{ number_format($totalPelanggan, 0, ',', '.') }}</h5>
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-800 transition-colors flex flex-col justify-between">
+                <div class="flex justify-between items-start mb-2">
+                    @php $profitColor = $profitHariIni >= 0 ? 'from-blue-500 to-indigo-600' : 'from-orange-500 to-red-600'; @endphp
+                    <div class="w-10 h-10 bg-gradient-to-br {{ $profitColor }} rounded-xl shadow border border-blue-400/20 flex items-center justify-center text-white shrink-0">
+                        <i class="fa-solid fa-hand-holding-dollar text-sm"></i>
                     </div>
-                    <div class="w-12 h-12 bg-gradient-to-br from-gray-800 to-gray-900 dark:from-slate-700 dark:to-slate-800 rounded-xl shadow-md flex items-center justify-center text-white">
-                        <i class="fa-solid fa-users text-xl"></i>
+                    <div class="text-right">
+                        <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-1">Profit Bersih</p>
+                        <h5 class="font-bold text-lg text-gray-800 dark:text-white tracking-tight" :class="'{{ $profitHariIni >= 0 ? '' : 'text-red-500 dark:text-red-400' }}'">
+                            {{ number_format($profitHariIni / 1000, 0, ',', '.') }}K
+                        </h5>
                     </div>
                 </div>
-                <hr class="border-gray-100 dark:border-slate-800 my-4">
-                <p class="text-sm text-gray-500 dark:text-gray-400"><i class="fa-solid fa-user-plus text-green-500 mr-1"></i> Pelanggan Terdaftar</p>
+                <div class="mt-auto pt-2 border-t border-gray-100 dark:border-slate-800">
+                     <p class="text-[10px] text-gray-500 dark:text-gray-400"><i class="fa-solid {{ $profitHariIni >= 0 ? 'fa-chart-line text-blue-500' : 'fa-chart-line-down text-red-500' }} mr-1"></i> Hari ini</p>
+                </div>
             </div>
 
-            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-800 transition-colors">
-                <div class="flex justify-between">
-                    <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 font-medium capitalize mb-1">Item Stok Menipis</p>
-                        <h5 class="font-bold text-2xl text-gray-800 dark:text-white tracking-tight">{{ $stokMenipis }} Item</h5>
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-800 transition-colors flex flex-col justify-between">
+                <div class="flex justify-between items-start mb-2">
+                    <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-fuchsia-600 rounded-xl shadow border border-purple-400/20 flex items-center justify-center text-white shrink-0">
+                        <i class="fa-solid fa-users text-sm"></i>
                     </div>
-                    <div class="w-12 h-12 {{ $stokMenipis > 0 ? 'bg-gradient-to-br from-red-500 to-red-600' : 'bg-gradient-to-br from-gray-800 to-gray-900 dark:from-slate-700 dark:to-slate-800' }} rounded-xl shadow-md flex items-center justify-center text-white">
-                        <i class="fa-solid fa-boxes-stacked text-xl"></i>
+                    <div class="text-right">
+                        <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-1">Pelanggan</p>
+                        <h5 class="font-bold text-lg text-gray-800 dark:text-white tracking-tight">{{ number_format($totalPelanggan, 0, ',', '.') }}</h5>
                     </div>
                 </div>
-                <hr class="border-gray-100 dark:border-slate-800 my-4">
-                @if($stokMenipis > 0)
-                    <p class="text-sm text-red-500 dark:text-red-400 font-medium"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Segera lakukan restock</p>
-                @else
-                    <p class="text-sm text-green-500 dark:text-green-400 font-medium"><i class="fa-solid fa-check mr-1"></i> Stok aman terkendali</p>
-                @endif
+                <div class="mt-auto pt-2 border-t border-gray-100 dark:border-slate-800">
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400"><i class="fa-solid fa-user-plus text-purple-500 mr-1"></i> Terdaftar</p>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-800 transition-colors flex flex-col justify-between">
+                <div class="flex justify-between items-start mb-2">
+                    <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl shadow border border-amber-300/20 flex items-center justify-center text-white shrink-0">
+                        <i class="fa-solid fa-id-card-clip text-sm"></i>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-1">Member</p>
+                        <h5 class="font-bold text-lg text-gray-800 dark:text-white tracking-tight">{{ number_format($totalMemberAktif, 0, ',', '.') }}</h5>
+                    </div>
+                </div>
+                <div class="mt-auto pt-2 border-t border-gray-100 dark:border-slate-800">
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400"><i class="fa-solid fa-check-circle text-amber-500 mr-1"></i> Member Aktif</p>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-800 transition-colors flex flex-col justify-between">
+                <div class="flex justify-between items-start mb-2">
+                    <div class="w-10 h-10 {{ $stokMenipis > 0 ? 'bg-gradient-to-br from-red-500 to-red-600' : 'bg-gradient-to-br from-gray-700 to-slate-800' }} rounded-xl shadow flex items-center justify-center text-white shrink-0">
+                        <i class="fa-solid fa-boxes-stacked text-sm"></i>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-1">Stok Tipis</p>
+                        <h5 class="font-bold text-lg text-gray-800 dark:text-white tracking-tight">{{ $stokMenipis }}</h5>
+                    </div>
+                </div>
+                <div class="mt-auto pt-2 border-t border-gray-100 dark:border-slate-800">
+                    @if($stokMenipis > 0)
+                        <p class="text-[10px] text-red-500 dark:text-red-400 font-medium"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Perlu restock</p>
+                    @else
+                        <p class="text-[10px] text-gray-400 dark:text-gray-500"><i class="fa-solid fa-check mr-1"></i> Stok aman</p>
+                    @endif
+                </div>
             </div>
 
         </div>

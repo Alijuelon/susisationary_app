@@ -16,7 +16,7 @@ return new class extends Migration
 
     $table->foreignId('id_kasir')->constrained('users')->onDelete('cascade');
     $table->foreignId('id_pelanggan')->nullable()->constrained('users')->onDelete('set null');
-    $table->foreignId('id_pesanan_online')->nullable()->constrained('pesanan_online')->onDelete('set null');
+    $table->foreignId('id_pesanan_online')->nullable()->constrained('pesanans')->onDelete('set null');
 
     $table->decimal('total_harga', 15, 2);
     $table->decimal('uang_bayar', 15, 2);

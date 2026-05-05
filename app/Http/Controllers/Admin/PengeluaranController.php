@@ -13,11 +13,18 @@ class PengeluaranController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $tglMulai = $request->input('tgl_mulai');
+        $tglAkhir = $request->input('tgl_akhir');
 
         // Query dasar beserta relasi tabel admin
         $query = Pengeluaran::with('admin')
                     ->orderBy('tanggal_pengeluaran', 'desc')
                     ->orderBy('created_at', 'desc');
+
+        // Filter rentang tanggal
+        if ($tglMulai && $tglAkhir) {
+            $query->whereBetween('tanggal_pengeluaran', [$tglMulai, $tglAkhir]);
+        }
 
         // Jika ada inputan pencarian
         if ($search) {
@@ -27,7 +34,7 @@ class PengeluaranController extends Controller
         // Pagination 10 data per halaman
         $pengeluaran = $query->paginate(10)->withQueryString();
 
-        return view('admin.pengeluaran.index', compact('pengeluaran', 'search'));
+        return view('admin.pengeluaran.index', compact('pengeluaran', 'search', 'tglMulai', 'tglAkhir'));
     }
 
     // 2. Menyimpan data pengeluaran baru (Dari Modal Tambah)
@@ -68,10 +75,24 @@ class PengeluaranController extends Controller
         return redirect()->route('admin.pengeluaran.index')->with('success', 'Catatan pengeluaran berhasil diperbarui!');
     }
 
-    // 4. Menghapus data pengeluaran
+    // 4. Menghapus data pengeluaran satuan
     public function destroy(Pengeluaran $pengeluaran)
     {
         $pengeluaran->delete();
-        return redirect()->route('admin.pengeluaran.index')->with('success', 'Catatan pengeluaran berhasil dihapus!');
+        return redirect()->back()->with('success', 'Catatan pengeluaran berhasil dihapus!');
+    }
+
+    // 5. Menghapus massal (Bulk Delete)
+    public function destroyBulk(Request $request)
+    {
+        $ids = $request->input('selected_ids');
+        
+        if (!$ids || count($ids) == 0) {
+            return redirect()->back()->with('error', 'Belum ada data pengeluaran yang dipilih untuk dihapus.');
+        }
+
+        Pengeluaran::whereIn('id', $ids)->delete();
+
+        return redirect()->back()->with('success', count($ids) . ' catatan pengeluaran berhasil dihapus sekaligus.');
     }
 }

@@ -28,7 +28,7 @@ class UserSeeder extends Seeder
             'nama_lengkap' => 'Siti (Kasir 1)',
             'username'     => 'kasir',
             'email'        => 'kasir@susistationary.com',
-            'password'     => Hash::make('password123'),
+            'password'     => Hash::make('  '),
             'role'         => 'kasir',
         ]);
 

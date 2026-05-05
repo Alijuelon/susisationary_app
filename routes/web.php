@@ -9,20 +9,26 @@ use App\Http\Controllers\Admin\BarangController;
 use App\Http\Controllers\Admin\LayananController;
 use App\Http\Controllers\Admin\PengeluaranController;
 use App\Http\Controllers\Admin\LaporanController;
+use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\Admin\MembershipController as AdminMembershipController;
 
 // Import Controllers Kasir
 use App\Http\Controllers\Kasir\KasirDashboardController;
 use App\Http\Controllers\Kasir\PosController;
 use App\Http\Controllers\Kasir\PesananMasukController;
-use App\Http\Controllers\Kasir\RiwayatController; // <-- Controller baru ditambahkan
+use App\Http\Controllers\Kasir\RiwayatController;
 use App\Http\Controllers\Kasir\PengaturanController;
+use App\Http\Controllers\Kasir\MembershipKasirController;
 
 // Import Controllers Pelanggan
 use App\Http\Controllers\Pelanggan\PelangganDashboardController;
 use App\Http\Controllers\Pelanggan\PesananOnlineController;
+use App\Http\Controllers\Pelanggan\MembershipController as PelangganMembershipController;
+
 use App\Models\Pengaturan;
 use App\Models\Layanan;
 use App\Models\Barang;
+use App\Models\Membership;
 
 
 /*
@@ -76,15 +82,32 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     
     // Kelola Master Data
-    Route::resource('barang', BarangController::class); // Menghasilkan route index, create, store, edit, update, destroy
+    Route::delete('/barang/bulk', [BarangController::class, 'destroyBulk'])->name('barang.destroyBulk');
+    Route::resource('/barang', BarangController::class); // Menghasilkan route index, create, store, edit, update, destroy
+    Route::delete('/layanan/bulk', [LayananController::class, 'destroyBulk'])->name('layanan.destroyBulk');
     Route::resource('layanan', LayananController::class);
     
     // Revisi 1: Kelola Pengeluaran
-    Route::resource('pengeluaran', PengeluaranController::class);
+    Route::delete('/pengeluaran/bulk', [PengeluaranController::class, 'destroyBulk'])->name('pengeluaran.destroyBulk');
+    Route::resource('pengeluaran', PengeluaranController::class)->except(['create', 'edit', 'show']);
     
     // Laporan Pendapatan & Pengeluaran
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
     Route::get('/laporan/cetak', [LaporanController::class, 'cetakPdf'])->name('laporan.cetak');
+
+    // Kelola Pengguna
+    Route::delete('/users/bulk', [UserManagementController::class, 'destroyBulk'])->name('users.destroyBulk');
+    Route::resource('users', UserManagementController::class)->except(['show', 'create']);
+    Route::patch('users/{id}/toggle-status', [UserManagementController::class, 'toggleStatus'])->name('users.toggle-status');
+
+    // Kelola Keanggotaan (Membership)
+    Route::delete('/membership/bulk', [AdminMembershipController::class, 'destroyBulk'])->name('membership.destroyBulk');
+    Route::get('/membership', [AdminMembershipController::class, 'index'])->name('membership.index');
+    Route::get('/membership/pengaturan', [AdminMembershipController::class, 'settings'])->name('membership.settings');
+    Route::post('/membership/pengaturan', [AdminMembershipController::class, 'updateSettings'])->name('membership.update_settings');
+    Route::patch('/membership/{id}/approve', [AdminMembershipController::class, 'approve'])->name('membership.approve');
+    Route::patch('/membership/{id}/reject', [AdminMembershipController::class, 'reject'])->name('membership.reject');
+    Route::delete('/membership/{id}', [AdminMembershipController::class, 'destroy'])->name('membership.destroy');
 
 });
 
@@ -101,18 +124,47 @@ Route::middleware(['auth', 'role:kasir'])->prefix('kasir')->name('kasir.')->grou
     // Input Transaksi (POS) & Revisi 2 (Struk)
     Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
     Route::post('/pos/bayar', [PosController::class, 'store'])->name('pos.store');
-    Route::get('/pos/struk/{id}', [PosController::class, 'cetakStruk'])->name('pos.struk'); // URL untuk pop-up / cetak struk
+    Route::get('/pos/struk/{id}', [PosController::class, 'cetakStruk'])->name('pos.struk');
     
+    // API: Cari Member untuk POS
+    Route::get('/pos/cari-member', function (\Illuminate\Http\Request $request) {
+        $q = $request->input('q', '');
+        $membership = Membership::with('pelanggan')
+            ->where('status', 'aktif')
+            ->where(function ($query) use ($q) {
+                $query->where('no_kartu', 'like', "%{$q}%")
+                      ->orWhereHas('pelanggan', function ($q2) use ($q) {
+                          $q2->where('nama_lengkap', 'like', "%{$q}%");
+                      });
+            })
+            ->first();
+        
+        if ($membership) {
+            return response()->json(['found' => true, 'membership' => $membership]);
+        }
+        return response()->json(['found' => false, 'message' => 'Member tidak ditemukan atau belum aktif.']);
+    })->name('pos.cari-member');
+
     // Kelola Antrean Pesanan Online
     Route::get('/pesanan-masuk', [PesananMasukController::class, 'index'])->name('pesanan.masuk');
     Route::patch('/pesanan-masuk/{id}/status', [PesananMasukController::class, 'updateStatus'])->name('pesanan.updateStatus');
+    Route::delete('/pesanan-masuk/bulk', [PesananMasukController::class, 'destroyBulk'])->name('pesanan.destroyBulk');
+    Route::delete('/pesanan-masuk/{id}', [PesananMasukController::class, 'destroy'])->name('pesanan.destroy');
     
-    // Riwayat Transaksi Kasir (Diperbarui agar tidak error undefined method)
+    // Riwayat Transaksi Kasir
     Route::get('/riwayat-transaksi', [RiwayatController::class, 'index'])->name('riwayat');
+    Route::delete('/riwayat-transaksi/bulk', [RiwayatController::class, 'destroyBulk'])->name('riwayat.destroyBulk');
+    Route::delete('/riwayat-transaksi/{id}', [RiwayatController::class, 'destroy'])->name('riwayat.destroy');
 
     // Kelola Pengaturan Struk
     Route::get('/pengaturan-struk', [PengaturanController::class, 'index'])->name('pengaturan.index');
     Route::post('/pengaturan-struk', [PengaturanController::class, 'update'])->name('pengaturan.update');
+
+    // Kelola Keanggotaan (Membership)
+    Route::delete('membership/bulk', [MembershipKasirController::class, 'destroyBulk'])->name('membership.destroyBulk');
+    Route::get('membership', [MembershipKasirController::class, 'index'])->name('membership.index');
+    Route::patch('membership/{id}/approve', [MembershipKasirController::class, 'approve'])->name('membership.approve');
+    Route::delete('membership/{id}', [MembershipKasirController::class, 'destroy'])->name('membership.destroy');
 });
 
 /*
@@ -124,14 +176,19 @@ Route::middleware(['auth', 'role:pelanggan'])->prefix('pelanggan')->name('pelang
     
     // Dashboard Pelanggan (Termasuk Revisi 3: Notifikasi status pesanan)
     Route::get('/dashboard', [PelangganDashboardController::class, 'index'])->name('dashboard');
-    
     // Upload & Pemesanan Layanan Cetak Online
     Route::get('/pesanan/baru', [PesananOnlineController::class, 'create'])->name('pesanan.create');
     Route::post('/pesanan/baru', [PesananOnlineController::class, 'store'])->name('pesanan.store');
     
     // Riwayat Transaksi Saya & Download PDF
     Route::get('/riwayat', [PesananOnlineController::class, 'riwayat'])->name('riwayat');
+    Route::delete('/riwayat/bulk', [PesananOnlineController::class, 'destroyBulk'])->name('pesanan.destroyBulk');
+    Route::delete('/riwayat/{id}', [PesananOnlineController::class, 'destroy'])->name('pesanan.destroy');
     Route::get('/riwayat/{id}/download', [PesananOnlineController::class, 'downloadStruk'])->name('riwayat.download');
+
+    // Keanggotaan Pelanggan
+    Route::get('/membership', [PelangganMembershipController::class, 'index'])->name('membership.index');
+    Route::post('/membership', [PelangganMembershipController::class, 'store'])->name('membership.store');
 
 });
 

@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Barang;
 use App\Models\DetailTransaksi;
 use App\Models\Layanan;
+use App\Models\Membership;
+use App\Models\Pengaturan;
+use App\Models\Pesanan;
 use App\Models\Transaksi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,7 +24,16 @@ class PosController extends Controller
         $barang = Barang::where('stok', '>', 0)->get();
         $layanan = Layanan::all();
 
-        return view('kasir.pos.index', compact('barang', 'layanan'));
+        // Ambil pesanan online yang berstatus "Siap Diambil"
+        $pesananSiap = Pesanan::with(['pelanggan', 'layanan'])
+            ->where('status', 'Siap Diambil')
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        // Ambil pengaturan membership
+        $pengaturan = Pengaturan::first();
+
+        return view('kasir.pos.index', compact('barang', 'layanan', 'pesananSiap', 'pengaturan'));
     }
 
     // 2. Memproses Pembayaran / Checkout
@@ -39,7 +51,30 @@ class PosController extends Controller
             return back()->with('error', 'Keranjang belanja masih kosong!');
         }
 
-        if ($request->uang_masuk < $request->total_bayar) {
+        $totalBayarAwal = (float) $request->total_bayar;
+        $diskonPersen = 0;
+        $totalSebelumDiskon = null;
+        $idMembership = null;
+        $totalAkhir = $totalBayarAwal;
+
+        // Cek membership discount
+        if ($request->filled('id_membership')) {
+            $membership = Membership::where('id', $request->id_membership)
+                ->where('status', 'aktif')
+                ->first();
+
+            if ($membership) {
+                $pengaturan = Pengaturan::first();
+                if ($pengaturan && $pengaturan->membership_aktif && $pengaturan->diskon_member > 0) {
+                    $diskonPersen = (float) $pengaturan->diskon_member;
+                    $totalSebelumDiskon = $totalBayarAwal;
+                    $totalAkhir = round($totalBayarAwal * (1 - $diskonPersen / 100), 0);
+                    $idMembership = $membership->id;
+                }
+            }
+        }
+
+        if ($request->uang_masuk < $totalAkhir) {
             return back()->with('error', 'Uang pelanggan tidak cukup!');
         }
 
@@ -54,16 +89,21 @@ class PosController extends Controller
             $transaksi = Transaksi::create([
                 'kode_transaksi' => $kodeUnik,
                 'id_kasir' => Auth::id(),
-                'total_harga' => $request->total_bayar,
+                'id_pelanggan' => $request->filled('id_pesanan_online') ? Pesanan::find($request->id_pesanan_online)?->id_pelanggan : null,
+                'id_pesanan_online' => $request->id_pesanan_online,
+                'id_membership' => $idMembership,
+                'diskon_persen' => $diskonPersen,
+                'total_sebelum_diskon' => $totalSebelumDiskon,
+                'nama_pelanggan' => $request->nama_pelanggan,
+                'total_harga' => $totalAkhir,
                 'uang_bayar' => $request->uang_masuk,
-                'kembalian' => $request->uang_masuk - $request->total_bayar,
+                'kembalian' => $request->uang_masuk - $totalAkhir,
                 'status' => 'Berhasil',
             ]);
 
-            // 🔥 PELINDUNG GANDA: Pastikan kita benar-benar mendapatkan ID-nya
+            // Pelindung Ganda: Pastikan kita benar-benar mendapatkan ID-nya
             $id_transaksi_baru = $transaksi->id;
             if (! $id_transaksi_baru) {
-                // Jika $transaksi->id kosong, ambil paksa ID dari database berdasarkan kode unik
                 $id_transaksi_baru = Transaksi::where('kode_transaksi', $kodeUnik)->value('id');
             }
 
@@ -80,7 +120,7 @@ class PosController extends Controller
 
                 // Simpan detail item ke database
                 DetailTransaksi::create([
-                    'id_transaksi' => $id_transaksi_baru, // <-- GUNAKAN VARIABEL PELINDUNG INI
+                    'id_transaksi' => $id_transaksi_baru,
                     'tipe_item' => ucfirst($item['tipe']),
                     'id_item' => $item['id'],
                     'harga_satuan' => $item['harga'],
@@ -89,15 +129,35 @@ class PosController extends Controller
                 ]);
             }
 
+            // 4. Update status pesanan online ke "Selesai" jika dari pesanan online
+            if ($request->filled('id_pesanan_online')) {
+                $pesanan = Pesanan::find($request->id_pesanan_online);
+                if ($pesanan) {
+                    $pesanan->update(['status' => 'Selesai']);
+                }
+            }
+
             DB::commit();
 
-            // Redirect ke halaman riwayat
-            return redirect()->route('kasir.riwayat')->with('success', 'Transaksi berhasil disimpan! Kode: '.$kodeUnik);
+            // Redirect ke halaman struk
+            return redirect()->route('kasir.pos.struk', $id_transaksi_baru)
+                ->with('success', 'Transaksi berhasil disimpan! Kode: '.$kodeUnik);
 
         } catch (\Exception $e) {
             DB::rollBack();
 
             return back()->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
+    }
+
+    // 3. Cetak Struk Transaksi
+    public function cetakStruk($id)
+    {
+        $transaksi = Transaksi::with(['detail', 'kasir', 'pelanggan', 'membership.pelanggan'])
+            ->findOrFail($id);
+
+        $toko = Pengaturan::first();
+
+        return view('kasir.pos.struk', compact('transaksi', 'toko'));
     }
 }

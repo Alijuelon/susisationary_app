@@ -17,6 +17,10 @@ class Transaksi extends Model
         'id_kasir',
         'id_pelanggan',
         'id_pesanan_online',
+        'id_membership',
+        'diskon_persen',
+        'total_sebelum_diskon',
+        'nama_pelanggan',
         'total_harga',
         'uang_bayar',
         'kembalian',
@@ -43,5 +47,11 @@ class Transaksi extends Model
     public function detail()
     {
         return $this->hasMany(DetailTransaksi::class, 'id_transaksi');
+    }
+
+    // Relasi: Transaksi terhubung ke membership (jika ada diskon member)
+    public function membership()
+    {
+        return $this->belongsTo(Membership::class, 'id_membership');
     }
 }

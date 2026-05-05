@@ -78,20 +78,74 @@
     }">
 
     @php
-        $notifCount = 0;
-        $notifLink = '#';
-        $notifMessage = '';
-        $notifTitle = '';
+        $notifications = [];
 
-        if (Auth::check() && Auth::user()->role === 'admin') {
-            $stokKritis = \App\Models\Barang::whereColumn('stok', '<=', 'stok_minimum')->count();
-            if ($stokKritis > 0) {
-                $notifCount = $stokKritis;
-                $notifTitle = 'Peringatan Stok!';
-                $notifMessage = $stokKritis . ' item barang stoknya menipis/habis.';
-                $notifLink = route('admin.barang.index');
+        if (Auth::check()) {
+            $userRole = Auth::user()->role;
+
+            if ($userRole === 'admin') {
+                // Stok kritis
+                $stokKritis = \App\Models\Barang::whereColumn('stok', '<=', 'stok_minimum')->count();
+                if ($stokKritis > 0) {
+                    $notifications[] = [
+                        'icon' => 'fa-triangle-exclamation',
+                        'iconColor' => 'text-red-500',
+                        'title' => 'Peringatan Stok!',
+                        'message' => $stokKritis . ' item barang stoknya menipis/habis.',
+                        'link' => route('admin.barang.index'),
+                    ];
+                }
+                // Membership menunggu
+                $memberMenunggu = \App\Models\Membership::where('status', 'menunggu')->count();
+                if ($memberMenunggu > 0) {
+                    $notifications[] = [
+                        'icon' => 'fa-id-card',
+                        'iconColor' => 'text-yellow-500',
+                        'title' => 'Permohonan Member Baru',
+                        'message' => $memberMenunggu . ' permohonan membership menunggu persetujuan.',
+                        'link' => route('admin.membership.index'),
+                    ];
+                }
+            } elseif ($userRole === 'kasir') {
+                // Pesanan siap diambil
+                $pesananSiap = \App\Models\Pesanan::where('status', 'Siap Diambil')->count();
+                if ($pesananSiap > 0) {
+                    $notifications[] = [
+                        'icon' => 'fa-box-open',
+                        'iconColor' => 'text-blue-500',
+                        'title' => 'Pesanan Siap Diambil',
+                        'message' => $pesananSiap . ' pesanan online menunggu pengambilan.',
+                        'link' => route('kasir.pos.index'),
+                    ];
+                }
+                // Membership menunggu
+                $memberMenunggu = \App\Models\Membership::where('status', 'menunggu')->count();
+                if ($memberMenunggu > 0) {
+                    $notifications[] = [
+                        'icon' => 'fa-id-card',
+                        'iconColor' => 'text-yellow-500',
+                        'title' => 'Permohonan Member',
+                        'message' => $memberMenunggu . ' permohonan membership baru.',
+                        'link' => route('kasir.membership.index'),
+                    ];
+                }
+            } elseif ($userRole === 'pelanggan') {
+                // Pesanan yang baru diupdate (Siap Diambil)
+                $pesananReady = \App\Models\Pesanan::where('id_pelanggan', Auth::id())
+                    ->where('status', 'Siap Diambil')->count();
+                if ($pesananReady > 0) {
+                    $notifications[] = [
+                        'icon' => 'fa-bell',
+                        'iconColor' => 'text-green-500',
+                        'title' => 'Pesanan Siap!',
+                        'message' => $pesananReady . ' pesanan Anda sudah siap diambil di toko.',
+                        'link' => route('pelanggan.dashboard'),
+                    ];
+                }
             }
         }
+
+        $notifCount = count($notifications);
     @endphp
 
     <div x-show="sidebarOpen" x-transition.opacity @click="sidebarOpen = false"
@@ -100,7 +154,7 @@
 
     @include('layouts.navigation')
 
-    <main class="flex-1 flex flex-col h-screen overflow-hidden w-full relative transition-all duration-500">
+    <main class="flex-1 flex flex-col h-screen overflow-hidden w-full relative">
 
         <nav
             class="flex items-center justify-between px-6 py-4 mx-4 mt-2 rounded-2xl transition-all duration-300 border border-transparent">
@@ -154,16 +208,18 @@
                                 Notifikasi Sistem</p>
                         </div>
                         @if ($notifCount > 0)
-                            <a href="{{ $notifLink }}"
-                                class="block px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                                <p class="text-sm font-bold text-slate-800 dark:text-white"><i
-                                        class="fa-solid fa-triangle-exclamation text-red-500 mr-2"></i>{{ $notifTitle }}
-                                </p>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5">{{ $notifMessage }}</p>
-                                <p
-                                    class="text-[10px] text-blue-600 dark:text-blue-400 mt-2 font-bold uppercase tracking-wide">
-                                    Cek Sekarang &rarr;</p>
-                            </a>
+                            @foreach($notifications as $notif)
+                                <a href="{{ $notif['link'] }}"
+                                    class="block px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border-b border-slate-50 dark:border-slate-800/30 last:border-0">
+                                    <p class="text-sm font-bold text-slate-800 dark:text-white"><i
+                                            class="fa-solid {{ $notif['icon'] }} {{ $notif['iconColor'] }} mr-2"></i>{{ $notif['title'] }}
+                                    </p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5">{{ $notif['message'] }}</p>
+                                    <p
+                                        class="text-[10px] text-blue-600 dark:text-blue-400 mt-2 font-bold uppercase tracking-wide">
+                                        Cek Sekarang &rarr;</p>
+                                </a>
+                            @endforeach
                         @else
                             <div class="px-4 py-8 text-center">
                                 <i

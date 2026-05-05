@@ -29,6 +29,16 @@ class AuthenticatedSessionController extends Controller
         // Regenerate session untuk keamanan
         $request->session()->regenerate();
 
+        // Cek apakah user aktif — jika tidak, logout dan tolak akses
+        if (!Auth::user()->is_active) {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')
+                ->withErrors(['email' => 'Akun Anda telah dinonaktifkan. Silakan hubungi administrator.']);
+        }
+
         $url = "/"; // Default fallback url
 
         if (Auth::user()->role === "admin") {

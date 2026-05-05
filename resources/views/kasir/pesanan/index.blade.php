@@ -4,6 +4,7 @@
     <div class="w-full" x-data="{ 
         showStatusModal: false, 
         orderItem: { id: '', status: '', nama_pelanggan: '' },
+        selectedIds: [],
         
         openStatusModal(item) {
             this.orderItem = { 
@@ -20,37 +21,45 @@
                 <h2 class="text-xl font-bold text-gray-800 dark:text-white">Daftar Antrean Cetak</h2>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Unduh file pelanggan dan perbarui status pengerjaan.</p>
             </div>
-            
-            <div class="flex flex-col sm:flex-row w-full md:w-auto gap-3">
-                
-                <form action="{{ route('kasir.pesanan.masuk') }}" method="GET" class="flex flex-col sm:flex-row gap-3 w-full" id="filterForm">
-                    <select name="status" onchange="document.getElementById('filterForm').submit()" class="bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm rounded-xl focus:ring-gray-900 dark:focus:ring-white focus:border-gray-900 dark:focus:border-white p-2.5 transition-colors">
-                        <option value="Semua" {{ request('status') == 'Semua' ? 'selected' : '' }}>Semua Status</option>
+        </div>
+
+        <!-- Filter Area -->
+        <div class="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl p-4 mb-6 shadow-sm">
+            <form action="{{ route('kasir.pesanan.masuk') }}" method="GET" class="flex flex-wrap md:flex-nowrap gap-3 items-center w-full">
+                <div class="w-full sm:w-auto">
+                    <input type="date" name="tgl_mulai" value="{{ request('tgl_mulai') }}" class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 block w-full p-2.5 dark:text-white" title="Dari Tanggal">
+                </div>
+                <div class="hidden sm:block text-gray-400">-</div>
+                <div class="w-full sm:w-auto">
+                    <input type="date" name="tgl_akhir" value="{{ request('tgl_akhir') }}" class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 block w-full p-2.5 dark:text-white" title="Sampai Tanggal">
+                </div>
+                <div class="w-full sm:w-auto">
+                    <select name="status" class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 block w-full p-2.5 dark:text-white relative z-50 appearance-auto">
+                        <option value="Semua">Semua Status</option>
                         <option value="Menunggu" {{ request('status') == 'Menunggu' ? 'selected' : '' }}>Menunggu</option>
                         <option value="Diproses" {{ request('status') == 'Diproses' ? 'selected' : '' }}>Diproses</option>
                         <option value="Siap Diambil" {{ request('status') == 'Siap Diambil' ? 'selected' : '' }}>Siap Diambil</option>
                         <option value="Selesai" {{ request('status') == 'Selesai' ? 'selected' : '' }}>Selesai</option>
+                        <option value="Dibatalkan" {{ request('status') == 'Dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
                     </select>
-
-                    <div class="relative w-full sm:w-56">
-                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <i class="fa-solid fa-search text-gray-400 dark:text-gray-500"></i>
-                        </div>
-                        <input type="text" name="search" value="{{ $search }}" placeholder="Cari nama atau ID..." 
-                               class="bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm rounded-xl focus:ring-gray-900 dark:focus:ring-white focus:border-gray-900 dark:focus:border-white block w-full pl-10 p-2.5 transition-colors">
-                        @if($search)
-                            <a href="{{ route('kasir.pesanan.masuk') }}" class="absolute inset-y-0 right-0 flex items-center pr-3 text-red-500 hover:text-red-700 dark:hover:text-red-400">
-                                <i class="fa-solid fa-times"></i>
-                            </a>
-                        @endif
+                </div>
+                <div class="relative w-full md:flex-1">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <i class="fa-solid fa-search text-gray-400"></i>
                     </div>
-                </form>
-
-            </div>
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama atau ID..." class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 block w-full pl-10 p-2.5 dark:text-white">
+                </div>
+                <button type="submit" class="w-full sm:w-auto bg-gray-900 dark:bg-slate-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-800 dark:hover:bg-slate-600 transition-colors shadow-sm">
+                    Filter
+                </button>
+                @if(request('search') || request('status') || request('tgl_mulai') || request('tgl_akhir'))
+                    <a href="{{ route('kasir.pesanan.masuk') }}" class="w-full sm:w-auto text-center px-4 py-2.5 text-sm font-bold text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/20 rounded-xl transition-colors">Reset</a>
+                @endif
+            </form>
         </div>
 
         @if(session('success'))
-            <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)" class="mb-6 bg-green-500 text-white px-5 py-4 rounded-xl shadow-md flex items-center justify-between transition-all">
+            <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" class="mb-6 bg-green-500 dark:bg-green-600 border border-green-600 dark:border-green-500 text-white px-5 py-4 rounded-xl shadow-md flex items-center justify-between transition-all">
                 <div class="flex items-center space-x-3">
                     <i class="fa-solid fa-circle-check text-xl"></i>
                     <p class="font-bold text-sm">{{ session('success') }}</p>
@@ -59,22 +68,52 @@
             </div>
         @endif
 
+        @if(session('error'))
+            <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" class="mb-6 bg-red-500 dark:bg-red-600 text-white px-5 py-4 rounded-xl shadow-md flex items-center justify-between transition-all">
+                <div class="flex items-center space-x-3">
+                    <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+                    <p class="font-bold text-sm">{{ session('error') }}</p>
+                </div>
+                <button @click="show = false" class="text-white hover:text-red-200"><i class="fa-solid fa-times"></i></button>
+            </div>
+        @endif
+
+        <!-- Bulk Delete Action Bar -->
+        <div x-show="selectedIds.length > 0" style="display: none;" x-transition class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-2xl p-4 mb-4 flex flex-col sm:flex-row justify-between items-center shadow-sm">
+            <div class="text-red-800 dark:text-red-400 font-bold mb-3 sm:mb-0">
+                <i class="fa-solid fa-check-double mr-2"></i> <span x-text="selectedIds.length"></span> Pesanan Terpilih
+            </div>
+            <button type="button" @click.prevent="if(confirm('Apakah Anda yakin ingin menghapus ' + selectedIds.length + ' pesanan sekaligus? Data tidak bisa dipulihkan.')) document.getElementById('bulkDeleteForm').submit();" class="bg-red-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md hover:bg-red-700 transition-colors w-full sm:w-auto">
+                <i class="fa-solid fa-trash mr-2"></i> Hapus Sekaligus
+            </button>
+        </div>
+
+        <form action="{{ route('kasir.pesanan.destroyBulk') }}" method="POST" id="bulkDeleteForm">
+            @csrf
+            @method('DELETE')
+
         <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden mb-6 transition-colors">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-gray-50/50 dark:bg-slate-800/50 text-[11px] text-gray-400 dark:text-gray-500 uppercase tracking-wider transition-colors">
+                            <th class="px-6 py-4 font-semibold text-center w-12">
+                                <input type="checkbox" @change="selectedIds = $event.target.checked ? [{{ $pesanan->pluck('id')->join(',') }}] : []" :checked="selectedIds.length === {{ $pesanan->count() }} && {{ $pesanan->count() }} > 0" class="rounded border-gray-300 text-red-600 focus:ring-red-500 bg-white dark:bg-slate-900">
+                            </th>
                             <th class="px-6 py-4 font-semibold">ID / Waktu Masuk</th>
                             <th class="px-6 py-4 font-semibold">Pelanggan</th>
                             <th class="px-6 py-4 font-semibold">Layanan & Catatan</th>
                             <th class="px-6 py-4 font-semibold text-center">File Dokumen</th>
                             <th class="px-6 py-4 font-semibold text-center">Status</th>
-                            <th class="px-6 py-4 font-semibold text-right">Aksi</th>
+                            <th class="px-6 py-4 font-semibold text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="text-sm text-gray-600 dark:text-gray-300 divide-y divide-gray-100 dark:divide-slate-800">
                         @forelse($pesanan as $item)
-                            <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors {{ $item->status === 'Menunggu' ? 'bg-yellow-50/30 dark:bg-yellow-900/10' : '' }}">
+                            <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors {{ $item->status === 'Menunggu' ? 'bg-yellow-50/30 dark:bg-yellow-900/10' : '' }}" :class="selectedIds.includes({{ $item->id }}) ? 'bg-red-50/30 dark:bg-red-900/10' : ''">
+                                <td class="px-6 py-4 text-center">
+                                    <input type="checkbox" name="selected_ids[]" value="{{ $item->id }}" x-model="selectedIds" class="rounded border-gray-300 text-red-600 focus:ring-red-500 bg-white dark:bg-slate-900">
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="font-bold text-gray-800 dark:text-white">#{{ $item->id }}</span> <br>
                                     <span class="text-[11px] text-gray-500 dark:text-gray-400">{{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}</span>
@@ -87,9 +126,14 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-center">
-                                    <a href="{{ asset('storage/' . $item->file_dokumen) }}" target="_blank" download class="inline-flex items-center justify-center w-8 h-8 bg-gray-100 dark:bg-slate-800 hover:bg-gray-900 dark:hover:bg-gray-200 hover:text-white dark:hover:text-slate-900 text-gray-600 dark:text-gray-400 rounded-lg transition-colors" title="Download File">
-                                        <i class="fa-solid fa-cloud-arrow-down"></i>
-                                    </a>
+                                    <div class="flex justify-center space-x-2">
+                                        <a href="{{ asset('storage/' . $item->file_dokumen) }}" target="_blank" class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-600 dark:hover:bg-blue-500 hover:text-white text-blue-600 dark:text-blue-400 rounded-lg transition-colors" title="Lihat Dokumen">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </a>
+                                        <a href="{{ asset('storage/' . $item->file_dokumen) }}" download class="inline-flex items-center justify-center w-8 h-8 bg-gray-100 dark:bg-slate-800 hover:bg-gray-900 dark:hover:bg-gray-200 hover:text-white dark:hover:text-slate-900 text-gray-600 dark:text-gray-400 rounded-lg transition-colors" title="Download File">
+                                            <i class="fa-solid fa-download"></i>
+                                        </a>
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 text-center">
                                     @if($item->status === 'Menunggu')
@@ -104,18 +148,31 @@
                                         <span class="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-colors">{{ $item->status }}</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 text-right">
-                                    <button @click="openStatusModal({{ json_encode($item) }})" class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shadow-sm">
-                                        Ubah Status
-                                    </button>
+                                <td class="px-6 py-4 text-center">
+                                    <div class="flex justify-center space-x-2">
+                                        <button type="button" @click="openStatusModal({{ json_encode($item) }})" class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shadow-sm inline-flex items-center">
+                                            Status
+                                        </button>
+                                        <form action="{{ route('kasir.pesanan.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pesanan online ini?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white dark:hover:bg-red-600 dark:hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shadow-sm inline-flex items-center border border-transparent" title="Hapus Pesanan">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="7" class="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
                                     <div class="flex flex-col items-center justify-center">
                                         <i class="fa-solid fa-inbox text-4xl mb-3 text-gray-300 dark:text-slate-600"></i>
-                                        <p class="font-medium text-gray-600 dark:text-gray-400">Tidak ada antrean pesanan.</p>
+                                        @if(request('search') || request('status') || request('tgl_mulai'))
+                                        <p class="font-medium text-gray-600 dark:text-gray-400">Pencarian untuk filter ini tidak ditemukan.</p>
+                                        @else
+                                        <p class="font-medium text-gray-600 dark:text-gray-400">Tidak ada antrean pesanan online.</p>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -124,6 +181,7 @@
                 </table>
             </div>
         </div>
+        </form>
 
         <div class="mb-8">
             {{ $pesanan->links() }}

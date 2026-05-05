@@ -51,4 +51,37 @@ class PesananMasukController extends Controller
 
         return redirect()->route('kasir.pesanan.masuk')->with('success', 'Status pesanan #' . $pesanan->id . ' berhasil diperbarui menjadi ' . $request->status . '!');
     }
+
+    // 3. Menghapus satu pesanan
+    public function destroy($id)
+    {
+        $pesanan = Pesanan::findOrFail($id);
+        // Hapus file dokumen pendukung jika ada
+        if ($pesanan->file_dokumen && \Storage::disk('public')->exists($pesanan->file_dokumen)) {
+            \Storage::disk('public')->delete($pesanan->file_dokumen);
+        }
+        $pesanan->delete();
+
+        return redirect()->back()->with('success', 'Pesanan online berhasil dihapus.');
+    }
+
+    // 4. Menghapus banyak pesanan sekaligus
+    public function destroyBulk(Request $request)
+    {
+        $ids = $request->input('selected_ids');
+        
+        if (!$ids || count($ids) == 0) {
+            return redirect()->back()->with('error', 'Belum ada data pesanan yang dipilih untuk dihapus.');
+        }
+
+        $pesanans = Pesanan::whereIn('id', $ids)->get();
+        foreach ($pesanans as $pesanan) {
+            if ($pesanan->file_dokumen && \Storage::disk('public')->exists($pesanan->file_dokumen)) {
+                \Storage::disk('public')->delete($pesanan->file_dokumen);
+            }
+            $pesanan->delete();
+        }
+
+        return redirect()->back()->with('success', count($ids) . ' pesanan online berhasil dihapus sekaligus.');
+    }
 }

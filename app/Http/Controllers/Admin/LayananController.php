@@ -59,6 +59,20 @@ class LayananController extends Controller
     public function destroy(Layanan $layanan)
     {
         $layanan->delete();
-        return redirect()->route('admin.layanan.index')->with('success', 'Layanan berhasil dihapus!');
+        return redirect()->back()->with('success', 'Layanan berhasil dihapus!');
+    }
+
+    // 5. Menghapus massal (Bulk Delete)
+    public function destroyBulk(Request $request)
+    {
+        $ids = $request->input('selected_ids');
+        
+        if (!$ids || count($ids) == 0) {
+            return redirect()->back()->with('error', 'Belum ada data layanan yang dipilih untuk dihapus.');
+        }
+
+        Layanan::whereIn('id', $ids)->delete();
+
+        return redirect()->back()->with('success', count($ids) . ' layanan berhasil dihapus sekaligus.');
     }
 }

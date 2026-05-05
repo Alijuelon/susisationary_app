@@ -8,5 +8,18 @@ use Illuminate\Database\Eloquent\Model;
 class Pengaturan extends Model
 {
     use HasFactory;
-    protected $fillable = ['nama_toko', 'alamat', 'no_telp', 'pesan_penutup'];
+
+    protected $fillable = [
+        'nama_toko',
+        'alamat',
+        'no_telp',
+        'pesan_penutup',
+        'membership_aktif',
+        'diskon_member',
+    ];
+
+    protected $casts = [
+        'membership_aktif' => 'boolean',
+        'diskon_member' => 'decimal:2',
+    ];
 }

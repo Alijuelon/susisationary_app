@@ -23,15 +23,15 @@ class DetailTransaksi extends Model
         return $this->belongsTo(Transaksi::class, 'id_transaksi');
     }
 
-    // Fungsi Pembantu: Mengambil detail barang jika tipe_item = 'Barang'
+    // Fungsi Pembantu: Mengambil detail barang
     public function barang()
     {
-        return $this->belongsTo(Barang::class, 'id_item')->where('tipe_item', 'Barang');
+        return $this->belongsTo(Barang::class, 'id_item');
     }
 
-    // Fungsi Pembantu: Mengambil detail layanan jika tipe_item = 'Layanan'
+    // Fungsi Pembantu: Mengambil detail layanan
     public function layanan()
     {
-        return $this->belongsTo(Layanan::class, 'id_item')->where('tipe_item', 'Layanan');
+        return $this->belongsTo(Layanan::class, 'id_item');
     }
 }
