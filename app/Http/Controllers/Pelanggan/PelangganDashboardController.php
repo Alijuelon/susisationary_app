@@ -20,10 +20,15 @@ class PelangganDashboardController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        // Mengambil antrian aktif (jika ada)
+        $antrianAktif = \App\Models\Queue::where('customer_id', $userId)
+            ->whereIn('status', [\App\Enums\QueueStatus::MENUNGGU, \App\Enums\QueueStatus::DIPROSES])
+            ->first();
+
         // Menghitung statistik
         $totalPesanan = Pesanan::where('id_pelanggan', $userId)->count();
         $pesananSelesai = Pesanan::where('id_pelanggan', $userId)->where('status', 'Selesai')->count();
 
-        return view('pelanggan.dashboard', compact('pesananAktif', 'totalPesanan', 'pesananSelesai'));
+        return view('pelanggan.dashboard', compact('pesananAktif', 'totalPesanan', 'pesananSelesai', 'antrianAktif'));
     }
 }

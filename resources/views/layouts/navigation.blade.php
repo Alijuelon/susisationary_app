@@ -62,7 +62,7 @@
             ];
 
             $kasirMenus = [
-                ['type' => 'link', 'route' => 'kasir.dashboard', 'pattern' => 'kasir.dashboard', 'icon' => 'fa-desktop', 'label' => 'Dasbor Kasir', 'badge' => 0],
+                ['type' => 'link', 'route' => 'kasir.dashboard', 'pattern' => 'kasir.dashboard', 'icon' => 'fa-desktop', 'label' => 'Dasbor & Live Antrian', 'badge' => 0],
                 ['type' => 'group', 'pattern' => 'kasir.pos.*|kasir.pesanan.*|kasir.riwayat', 'icon' => 'fa-cash-register', 'label' => 'Transaksi POS', 'badge' => $pesananSiapDiambil, 'children' => [
                     ['route' => 'kasir.pos.index', 'pattern' => 'kasir.pos.*', 'label' => 'Menu Kasir'],
                     ['route' => 'kasir.pesanan.masuk', 'pattern' => 'kasir.pesanan.*', 'label' => 'Pesanan Online', 'badge' => $pesananSiapDiambil],
@@ -70,12 +70,12 @@
                 ]],
                 ['type' => 'group', 'pattern' => 'kasir.membership.*|kasir.pengaturan.*', 'icon' => 'fa-gears', 'label' => 'Manajemen Toko', 'badge' => $membershipMenunggu, 'children' => [
                     ['route' => 'kasir.membership.index', 'pattern' => 'kasir.membership.*', 'label' => 'Setuju Member', 'badge' => $membershipMenunggu],
-                    ['route' => 'kasir.pengaturan.index', 'pattern' => 'kasir.pengaturan.*', 'label' => 'Seting Struk'],
+                    ['route' => 'kasir.pengaturan.index', 'pattern' => 'kasir.pengaturan.*', 'label' => 'Seting Toko & Antrian'],
                 ]],
             ];
 
             $pelangganMenus = [
-                ['type' => 'link', 'route' => 'pelanggan.dashboard', 'pattern' => 'pelanggan.dashboard', 'icon' => 'fa-house', 'label' => 'Dasbor Saya', 'badge' => 0],
+                ['type' => 'link', 'route' => 'pelanggan.dashboard', 'pattern' => 'pelanggan.dashboard', 'icon' => 'fa-house', 'label' => 'Dasbor & Antrian', 'badge' => 0],
                 ['type' => 'group', 'pattern' => 'pelanggan.pesanan.*|pelanggan.riwayat', 'icon' => 'fa-cloud-arrow-up', 'label' => 'Order & Histori', 'badge' => 0, 'children' => [
                     ['route' => 'pelanggan.pesanan.create', 'pattern' => 'pelanggan.pesanan.*', 'label' => 'Pesan Cetak Baru'],
                     ['route' => 'pelanggan.riwayat', 'pattern' => 'pelanggan.riwayat', 'label' => 'Riwayat Saya'],

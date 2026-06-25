@@ -165,6 +165,10 @@ Route::middleware(['auth', 'role:kasir'])->prefix('kasir')->name('kasir.')->grou
     Route::get('membership', [MembershipKasirController::class, 'index'])->name('membership.index');
     Route::patch('membership/{id}/approve', [MembershipKasirController::class, 'approve'])->name('membership.approve');
     Route::delete('membership/{id}', [MembershipKasirController::class, 'destroy'])->name('membership.destroy');
+
+    // Sistem Antrian Online (Kasir)
+    Route::post('/queue/{id}/process', [\App\Http\Controllers\QueueController::class, 'processQueue'])->name('queue.process');
+    Route::post('/queue/{id}/complete', [\App\Http\Controllers\QueueController::class, 'completeQueue'])->name('queue.complete');
 });
 
 /*
@@ -189,6 +193,10 @@ Route::middleware(['auth', 'role:pelanggan'])->prefix('pelanggan')->name('pelang
     // Keanggotaan Pelanggan
     Route::get('/membership', [PelangganMembershipController::class, 'index'])->name('membership.index');
     Route::post('/membership', [PelangganMembershipController::class, 'store'])->name('membership.store');
+
+    // Sistem Antrian Online (Pelanggan)
+    Route::post('/queue/take', [\App\Http\Controllers\QueueController::class, 'takeQueue'])->name('queue.take');
+    Route::post('/queue/{id}/cancel', [\App\Http\Controllers\QueueController::class, 'cancelQueue'])->name('queue.cancel');
 
 });
 

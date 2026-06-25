@@ -18,6 +18,10 @@ return new class extends Migration
     $table->foreignId('id_pelanggan')->nullable()->constrained('users')->onDelete('set null');
     $table->unsignedBigInteger('id_pesanan_online')->nullable();
     $table->foreign('id_pesanan_online')->references('id')->on('pesanans')->onDelete('set null');
+    $table->foreignId('id_membership')->nullable()->constrained('memberships')->nullOnDelete();
+    $table->decimal('diskon_persen', 5, 2)->default(0);
+    $table->decimal('total_sebelum_diskon', 15, 2)->nullable();
+    $table->string('nama_pelanggan')->nullable();
 
     $table->decimal('total_harga', 15, 2);
     $table->decimal('uang_bayar', 15, 2);

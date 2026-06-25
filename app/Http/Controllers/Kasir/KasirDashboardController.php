@@ -32,10 +32,17 @@ class KasirDashboardController extends Controller
             ->take(5)
             ->get();
 
+        // 4. Daftar Antrian Aktif Hari Ini
+        $daftarAntrian = \App\Models\Queue::whereDate('created_at', $hariIni)
+            ->whereIn('status', [\App\Enums\QueueStatus::MENUNGGU, \App\Enums\QueueStatus::DIPROSES])
+            ->orderBy('created_at', 'asc')
+            ->get();
+
         return view('kasir.dashboard', compact(
             'pendapatanHariIni', 
             'totalTransaksi', 
-            'transaksiTerbaru'
+            'transaksiTerbaru',
+            'daftarAntrian'
         ));
     }
 }
