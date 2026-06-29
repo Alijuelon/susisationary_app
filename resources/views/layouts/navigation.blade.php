@@ -9,10 +9,9 @@
     <div class="h-20 flex items-center px-3 lg:px-4 mt-2 shrink-0 relative">
         <div class="flex items-center w-full group cursor-pointer transition-all duration-300"
             :class="sidebarCollapsed ? 'justify-center px-0' : 'px-3'">
-            <div class="w-8 h-8 rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 flex items-center justify-center shadow-md dark:shadow-none shrink-0 transform transition-transform duration-300 group-hover:scale-105"
+            <img src="{{ asset('images/susi_logo.jpg') }}" alt="Susi Stationary Logo" 
+                class="w-8 h-8 rounded-lg object-cover shadow-md shrink-0 transform transition-transform duration-300 group-hover:scale-105"
                 :class="!sidebarCollapsed && 'mr-3'">
-                <i class="fa-solid fa-store text-sm"></i>
-            </div>
             <span x-show="!sidebarCollapsed" x-transition:enter="transition ease-out duration-300 delay-100"
                 x-transition:enter-start="opacity-0 translate-x-2" x-transition:enter-end="opacity-100 translate-x-0"
                 x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"

@@ -54,9 +54,7 @@
     <nav :class="scrolled ? 'bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-sm dark:shadow-slate-800 py-4' : 'bg-transparent py-6'" class="fixed w-full top-0 z-50 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-6 lg:px-8 flex justify-between items-center">
             <a href="#" class="flex items-center gap-3 group">
-                <div class="w-10 h-10 bg-blue-600 dark:bg-blue-700 text-white rounded-xl flex items-center justify-center transform group-hover:rotate-12 transition-transform shadow-lg shadow-blue-200 dark:shadow-none">
-                    <i class="fa-solid fa-store text-lg"></i>
-                </div>
+                <img src="{{ asset('images/susi_logo.jpg') }}" alt="Logo" class="w-10 h-10 rounded-xl object-cover shadow-lg transform group-hover:rotate-12 transition-transform">
                 <span class="font-black text-xl tracking-tight text-slate-900 dark:text-white transition-colors">{{ $toko->nama_toko ?? 'SUSI STATIONARY' }}</span>
             </a>
 
@@ -109,10 +107,7 @@
                 </div>
                 
                 <div class="relative reveal animate-float hidden lg:block">
-                    <div class="grid grid-cols-2 gap-4">
-                        <img src="https://images.unsplash.com/photo-1583508915901-b5f84c1dcde1?q=80&w=800&auto=format&fit=crop" alt="Stationary" class="rounded-3xl shadow-xl w-full h-64 object-cover object-center mt-12 border-4 border-white dark:border-slate-800 transition-colors">
-                        <img src="https://images.unsplash.com/photo-1621413812234-738b939ab7ea?q=80&w=800&auto=format&fit=crop" alt="Printing" class="rounded-3xl shadow-xl w-full h-80 object-cover object-center border-4 border-white dark:border-slate-800 transition-colors">
-                    </div>
+                    <img src="{{ asset('images/susi_bg.jpg') }}" alt="Susi Stationary Banner" class="rounded-3xl shadow-2xl w-full h-auto object-cover object-center border-4 border-white dark:border-slate-800 transition-colors">
                     
                     <div class="absolute top-1/2 left-0 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 flex items-center gap-4 transition-colors">
                         <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center text-xl transition-colors">
@@ -208,7 +203,7 @@
 
             <div class="grid md:grid-cols-2 gap-8 items-center border-t border-slate-800 dark:border-slate-800/50 pt-8 transition-colors">
                 <div>
-                    <h3 class="text-2xl font-black text-white mb-2"><i class="fa-solid fa-store text-blue-500 mr-2"></i> {{ $toko->nama_toko ?? 'SUSI STATIONARY' }}</h3>
+                    <h3 class="text-2xl font-black text-white mb-2 flex items-center"><img src="{{ asset('images/susi_logo.jpg') }}" alt="Logo" class="w-8 h-8 rounded-lg object-cover mr-3"> {{ $toko->nama_toko ?? 'SUSI STATIONARY' }}</h3>
                     <p class="text-slate-400 dark:text-slate-500 text-sm mb-1 transition-colors"><i class="fa-solid fa-location-dot w-5"></i> {{ $toko->alamat ?? 'Jl. Pramuka, Bengkalis' }}</p>
                     <p class="text-slate-400 dark:text-slate-500 text-sm transition-colors"><i class="fa-brands fa-whatsapp w-5"></i> {{ $toko->no_telp ?? '0812-3456-7890' }}</p>
                 </div>

@@ -34,7 +34,7 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
         .bg-showcase {
-            background-image: url('https://images.unsplash.com/photo-1583508915901-b5f84c1dcde1?q=80&w=1200&auto=format&fit=crop');
+            background-image: url('/images/susi_bg.jpg');
             background-size: cover;
             background-position: center;
         }
@@ -60,9 +60,7 @@
             
             <div class="mb-auto">
                 <a href="/" class="inline-flex items-center gap-2 group">
-                    <div class="w-8 h-8 md:w-10 md:h-10 bg-blue-600 dark:bg-blue-700 text-white rounded-xl flex items-center justify-center transform group-hover:-rotate-12 transition-transform shadow-md shadow-blue-200 dark:shadow-none">
-                        <i class="fa-solid fa-store text-sm md:text-lg"></i>
-                    </div>
+                    <img src="{{ asset('images/susi_logo.jpg') }}" alt="Logo" class="w-8 h-8 md:w-10 md:h-10 rounded-xl object-cover shadow-md transform group-hover:-rotate-12 transition-transform">
                     <span class="font-black text-lg md:text-xl tracking-tight text-slate-900 dark:text-white transition-colors">{{ $toko->nama_toko ?? 'SUSI STATIONARY' }}</span>
                 </a>
             </div>
@@ -79,7 +77,7 @@
 
         {{-- Kolom Kanan: Showcase Branding (Hidden on Mobile) --}}
         <div class="hidden lg:flex lg:w-[55%] xl:w-[60%] relative bg-showcase animate__animated animate__fadeInRight">
-            <div class="absolute inset-0 bg-gradient-to-br from-blue-900/80 dark:from-slate-900/90 to-purple-900/90 dark:to-slate-800/90 mix-blend-multiply transition-colors"></div>
+            <div class="absolute inset-0 bg-gradient-to-br from-blue-900/20 dark:from-slate-900/60 to-purple-900/20 dark:to-slate-800/60 transition-colors"></div>
             
             <div class="relative z-10 flex flex-col justify-center items-center h-full w-full text-white p-16">
                 <!-- Decorative Elements -->

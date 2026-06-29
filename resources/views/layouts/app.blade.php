@@ -56,11 +56,28 @@
         .sidebar-transition {
             transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
+        body {
+            background-image: url('/images/susi_bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-color: rgba(248, 249, 250, 0.85); /* Light mode overlay */
+            z-index: -1;
+        }
+        .dark body::before {
+            background-color: rgba(2, 6, 23, 0.85); /* Dark mode overlay */
+        }
     </style>
 </head>
 
 <body
-    class="font-sans antialiased text-slate-600 dark:text-slate-300 bg-[#f8f9fa] dark:bg-slate-950 flex h-screen overflow-hidden"
+    class="font-sans antialiased text-slate-600 dark:text-slate-300 flex h-screen overflow-hidden relative"
     x-data="{
         sidebarOpen: false,
         sidebarCollapsed: false,
