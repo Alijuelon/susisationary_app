@@ -19,7 +19,7 @@
         </div>
 
         <!-- Modul Antrian -->
-        <div class="mb-6">
+        <div class="mb-6" x-data="{ showGuideModal: false }">
             @if($antrianAktif)
                 <div class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl p-1 shadow-lg relative overflow-hidden transition-all duration-300 transform hover:scale-[1.01]">
                     <div class="bg-white dark:bg-slate-900 rounded-xl p-6 relative z-10 flex flex-col md:flex-row items-center justify-between backdrop-blur-xl bg-opacity-90 dark:bg-opacity-90">
@@ -51,6 +51,9 @@
                             </div>
                         </div>
                         <div class="flex space-x-3 w-full md:w-auto">
+                            <button type="button" @click="showGuideModal = true" class="px-4 py-3 bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 font-bold rounded-xl transition-colors border border-gray-200 dark:border-slate-700" title="Panduan Antrian">
+                                <i class="fa-solid fa-circle-question"></i>
+                            </button>
                             @if($antrianAktif->status === \App\Enums\QueueStatus::MENUNGGU)
                                 <form action="{{ route('pelanggan.queue.cancel', $antrianAktif->id) }}" method="POST" class="w-full md:w-auto" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan antrian ini?');">
                                     @csrf
@@ -83,14 +86,64 @@
                         </div>
                     </div>
                     
-                    <form action="{{ route('pelanggan.queue.take') }}" method="POST" class="z-10 w-full md:w-auto">
-                        @csrf
-                        <button type="submit" class="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 dark:shadow-indigo-900/20 transition-all transform hover:-translate-y-0.5 flex items-center justify-center">
-                            <i class="fa-solid fa-hand-pointer mr-2"></i> Ambil Sekarang
+                    <div class="z-10 flex space-x-3 w-full md:w-auto mt-4 md:mt-0">
+                        <button type="button" @click="showGuideModal = true" class="px-4 py-3 bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors border border-transparent" title="Panduan Antrian">
+                            <i class="fa-solid fa-circle-question"></i>
                         </button>
-                    </form>
+                        <form action="{{ route('pelanggan.queue.take') }}" method="POST" class="w-full md:w-auto">
+                            @csrf
+                            <button type="submit" class="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 dark:shadow-indigo-900/20 transition-all transform hover:-translate-y-0.5 flex items-center justify-center">
+                                <i class="fa-solid fa-hand-pointer mr-2"></i> Ambil Sekarang
+                            </button>
+                        </form>
+                    </div>
                 </div>
             @endif
+
+            {{-- MODAL PANDUAN PELANGGAN --}}
+            <div x-show="showGuideModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                    <div x-show="showGuideModal" x-transition.opacity class="fixed inset-0 bg-gray-900 bg-opacity-60 dark:bg-opacity-80 transition-opacity" @click="showGuideModal = false" aria-hidden="true"></div>
+                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                    <div x-show="showGuideModal" 
+                         x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
+                         x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                         class="inline-block align-bottom bg-white dark:bg-slate-900 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full border border-gray-100 dark:border-slate-800">
+                        
+                        <div class="px-6 py-5 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center">
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center">
+                                <i class="fa-solid fa-circle-info text-indigo-500 mr-2"></i> Panduan Antrian Online
+                            </h3>
+                            <button type="button" @click="showGuideModal = false" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors">
+                                <i class="fa-solid fa-times text-xl"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="px-6 py-6 text-sm text-gray-600 dark:text-gray-300 space-y-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0 mt-1"><i class="fa-solid fa-1 text-indigo-500 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-900/30 w-7 h-7 rounded-full flex items-center justify-center"></i></div>
+                                <div class="ml-3"><p><strong class="text-gray-800 dark:text-white">Ambil Antrian</strong><br>Klik tombol "Ambil Sekarang" untuk mendapatkan nomor antrian Anda secara online. Anda tidak perlu repot-repot datang ke toko hanya untuk mengambil nomor antrean.</p></div>
+                            </div>
+                            <div class="flex">
+                                <div class="flex-shrink-0 mt-1"><i class="fa-solid fa-2 text-indigo-500 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-900/30 w-7 h-7 rounded-full flex items-center justify-center"></i></div>
+                                <div class="ml-3"><p><strong class="text-gray-800 dark:text-white">Pantau Status</strong><br>Setelah mendaftar, Anda dapat memantau status antrian (Menunggu / Diproses) dan estimasi waktu tunggu secara langsung (Live) dari dashboard ini.</p></div>
+                            </div>
+                            <div class="flex">
+                                <div class="flex-shrink-0 mt-1"><i class="fa-solid fa-3 text-indigo-500 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-900/30 w-7 h-7 rounded-full flex items-center justify-center"></i></div>
+                                <div class="ml-3"><p><strong class="text-gray-800 dark:text-white">Datang ke Toko</strong><br>Silakan datang ke toko ketika status antrian Anda sudah dekat atau berubah menjadi "Diproses". Pastikan Anda ada di lokasi saat dipanggil oleh kasir.</p></div>
+                            </div>
+                            <div class="flex">
+                                <div class="flex-shrink-0 mt-1"><i class="fa-solid fa-4 text-indigo-500 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-900/30 w-7 h-7 rounded-full flex items-center justify-center"></i></div>
+                                <div class="ml-3"><p><strong class="text-gray-800 dark:text-white">Pembatalan</strong><br>Anda dapat membatalkan nomor antrian kapan saja, selama statusnya masih "Menunggu".</p></div>
+                            </div>
+                        </div>
+                        
+                        <div class="px-6 py-4 bg-gray-50 dark:bg-slate-800/80 rounded-b-2xl border-t border-gray-100 dark:border-slate-800 text-center">
+                            <button type="button" @click="showGuideModal = false" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-md transition-colors text-sm w-full sm:w-auto">Mengerti</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">

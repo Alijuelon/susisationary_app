@@ -45,14 +45,14 @@
         <div class="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl p-4 mb-6 shadow-sm">
             <form action="{{ route('kasir.riwayat') }}" method="GET" class="flex flex-wrap md:flex-nowrap gap-3 items-center w-full">
                 <div class="w-full sm:w-auto">
-                    <input type="date" name="tgl_mulai" value="{{ request('tgl_mulai') }}" class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 block w-full p-2.5 dark:text-white" title="Dari Tanggal">
+                    <input type="date" name="tgl_mulai" value="{{ request('tgl_mulai') }}" class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 block w-full p-2.5 text-gray-900 dark:text-white" title="Dari Tanggal">
                 </div>
                 <div class="hidden sm:block text-gray-400">-</div>
                 <div class="w-full sm:w-auto">
-                    <input type="date" name="tgl_akhir" value="{{ request('tgl_akhir') }}" class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 block w-full p-2.5 dark:text-white" title="Sampai Tanggal">
+                    <input type="date" name="tgl_akhir" value="{{ request('tgl_akhir') }}" class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 block w-full p-2.5 text-gray-900 dark:text-white" title="Sampai Tanggal">
                 </div>
                 <div class="w-full sm:w-auto">
-                    <select name="status" class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 block w-full p-2.5 dark:text-white relative z-50 appearance-auto">
+                    <select name="status" class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 block w-full p-2.5 text-gray-900 dark:text-white relative z-50 appearance-auto">
                         <option value="Semua">Semua Status</option>
                         <option value="Berhasil" {{ request('status') == 'Berhasil' ? 'selected' : '' }}>Berhasil</option>
                         <option value="Dibatalkan" {{ request('status') == 'Dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
@@ -62,7 +62,7 @@
                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <i class="fa-solid fa-search text-gray-400"></i>
                     </div>
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari ID/Pelanggan..." class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 block w-full pl-10 p-2.5 dark:text-white">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari ID/Pelanggan..." class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 block w-full pl-10 p-2.5 text-gray-900 dark:text-white">
                 </div>
                 <button type="submit" class="w-full sm:w-auto bg-gray-900 dark:bg-slate-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-800 dark:hover:bg-slate-600 transition-colors shadow-sm">
                     Filter
@@ -73,29 +73,7 @@
             </form>
         </div>
 
-        @if(session('success'))
-        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" class="mb-6 bg-green-500 dark:bg-green-600 border border-green-600 dark:border-green-500 text-white px-5 py-4 rounded-xl shadow-md flex items-center justify-between transition-all">
-            <div class="flex items-center space-x-3">
-                <i class="fa-solid fa-circle-check text-xl"></i>
-                <p class="font-bold text-sm">{{ session('success') }}</p>
-            </div>
-            <button @click="show = false" class="text-white hover:text-green-200">
-                <i class="fa-solid fa-times"></i>
-            </button>
-        </div>
-        @endif
-        
-        @if(session('error'))
-        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" class="mb-6 bg-red-500 dark:bg-red-600 text-white px-5 py-4 rounded-xl shadow-md flex items-center justify-between transition-all">
-            <div class="flex items-center space-x-3">
-                <i class="fa-solid fa-triangle-exclamation text-xl"></i>
-                <p class="font-bold text-sm">{{ session('error') }}</p>
-            </div>
-            <button @click="show = false" class="text-white hover:text-red-200">
-                <i class="fa-solid fa-times"></i>
-            </button>
-        </div>
-        @endif
+
 
         <!-- Bulk Delete Action Bar -->
         <div x-show="selectedIds.length > 0" style="display: none;" x-transition class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-2xl p-4 mb-4 flex flex-col sm:flex-row justify-between items-center shadow-sm">
@@ -107,9 +85,13 @@
             </button>
         </div>
 
-        <form action="{{ route('kasir.riwayat.destroyBulk') }}" method="POST" id="bulkDeleteForm">
+        <form action="{{ route('kasir.riwayat.destroyBulk') }}" method="POST" id="bulkDeleteForm" style="display: none;">
             @csrf
             @method('DELETE')
+            <template x-for="id in selectedIds">
+                <input type="hidden" name="selected_ids[]" :value="id">
+            </template>
+        </form>
 
         <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden mb-6 transition-colors">
             <div class="overflow-x-auto">
@@ -145,7 +127,7 @@
                             </td>
                             <td class="px-6 py-4 text-center">
                                 <div class="flex justify-center space-x-2">
-                                    <button @click="openReceipt({{ json_encode($item) }}, '{{ Auth::user()->nama_lengkap }}')" class="bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-gray-900 dark:hover:bg-gray-200 hover:text-white dark:hover:text-slate-900 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors inline-flex items-center border border-transparent dark:border-slate-700">
+                                    <button type="button" @click="openReceipt({{ json_encode($item) }}, '{{ Auth::user()->nama_lengkap }}')" class="bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-gray-900 dark:hover:bg-gray-200 hover:text-white dark:hover:text-slate-900 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors inline-flex items-center border border-transparent dark:border-slate-700">
                                         <i class="fa-solid fa-receipt mr-1.5"></i> Detail
                                     </button>
                                     <form action="{{ route('kasir.riwayat.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus transaksi penjualan ini?');">
@@ -176,7 +158,6 @@
                 </table>
             </div>
         </div>
-        </form>
 
         <div class="mb-8">
             {{ $riwayat->links() }}

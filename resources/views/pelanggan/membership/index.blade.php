@@ -1,7 +1,12 @@
 <x-app-layout>
     <x-slot name="header">Keanggotaan Saya</x-slot>
 
-    <div class="w-full max-w-2xl">
+    <div class="w-full max-w-2xl" x-data="{
+        showConfirmModal: false,
+        openConfirmModal() {
+            this.showConfirmModal = true;
+        }
+    }">
         <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 transition-colors">Status keanggotaan Anda di Susi Stationary. Dapatkan diskon spesial di setiap transaksi!</p>
 
         @if($membership)
@@ -91,12 +96,9 @@
                         <p class="text-xs">Diskon <strong>{{ $pengaturan->diskon_member }}%</strong> untuk setiap transaksi di Susi Stationary.</p>
                     </div>
 
-                    <form method="POST" action="{{ route('pelanggan.membership.store') }}" onsubmit="return confirm('Daftarkan diri Anda sebagai member?')">
-                        @csrf
-                        <button type="submit" class="bg-blue-600 text-white px-8 py-3.5 rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 dark:shadow-blue-900/20 transition-all text-sm hover:-translate-y-0.5">
-                            <i class="fa-solid fa-user-plus mr-2"></i> Daftar Membership Sekarang
-                        </button>
-                    </form>
+                    <button type="button" @click="openConfirmModal()" class="bg-blue-600 text-white px-8 py-3.5 rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 dark:shadow-blue-900/20 transition-all text-sm hover:-translate-y-0.5">
+                        <i class="fa-solid fa-user-plus mr-2"></i> Daftar Membership Sekarang
+                    </button>
                 @else
                     <div class="bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-500 dark:text-gray-400 px-5 py-4 rounded-xl text-sm max-w-md mx-auto transition-colors">
                         <p><i class="fa-solid fa-circle-pause mr-2"></i>Program membership sedang tidak aktif saat ini. Silakan kembali lagi nanti.</p>
@@ -104,5 +106,35 @@
                 @endif
             </div>
         @endif
+
+        {{-- MODAL KONFIRMASI DAFTAR --}}
+        <div x-show="showConfirmModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div x-show="showConfirmModal" x-transition.opacity class="fixed inset-0 bg-gray-900 bg-opacity-60 dark:bg-opacity-80 transition-opacity" @click="showConfirmModal = false" aria-hidden="true"></div>
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                <div x-show="showConfirmModal" 
+                     x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
+                     x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                     class="inline-block align-bottom bg-white dark:bg-slate-900 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-sm w-full border border-gray-100 dark:border-slate-800">
+                    
+                    <div class="px-6 py-6 text-center">
+                        <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/40 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white dark:border-slate-800 shadow-sm transition-colors">
+                            <i class="fa-solid fa-user-plus text-2xl text-blue-500 dark:text-blue-400"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Konfirmasi Pendaftaran</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Daftarkan diri Anda sebagai member sekarang untuk mulai mendapatkan keuntungan diskon khusus?</p>
+                    </div>
+
+                    <div class="px-6 py-4 bg-gray-50 dark:bg-slate-800/80 flex justify-center space-x-3 rounded-b-2xl border-t border-gray-100 dark:border-slate-800 transition-colors">
+                        <button type="button" @click="showConfirmModal = false" class="w-1/2 px-5 py-2.5 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors text-sm">Batal</button>
+                        
+                        <form action="{{ route('pelanggan.membership.store') }}" method="POST" class="w-1/2 m-0">
+                            @csrf
+                            <button type="submit" class="w-full px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-md transition-colors text-sm">Ya, Daftar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </x-app-layout>

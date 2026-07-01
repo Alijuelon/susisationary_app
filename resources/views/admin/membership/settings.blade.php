@@ -12,7 +12,7 @@
                 <h3 class="font-bold text-gray-800 dark:text-white text-base"><i class="fa-solid fa-gear mr-2 text-blue-500"></i>Konfigurasi Membership</h3>
             </div>
 
-            <form method="POST" action="{{ route('admin.membership.updateSettings') }}" class="p-6 space-y-6">
+            <form method="POST" action="{{ route('admin.membership.update_settings') }}" class="p-6 space-y-6">
                 @csrf
 
                 {{-- Toggle Membership Aktif --}}
@@ -33,7 +33,7 @@
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2">Persentase Diskon Member (%)</label>
                     <div class="relative">
                         <input type="number" name="diskon_member" value="{{ $pengaturan->diskon_member ?? 0 }}" min="0" max="100" step="0.01"
-                            class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 rounded-xl p-3 pr-12 text-lg font-bold focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                            class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-gray-300 rounded-xl p-3 pr-12 text-lg font-bold focus:ring-blue-500 focus:border-blue-500 transition-colors">
                         <div class="absolute inset-y-0 right-0 flex items-center pr-4">
                             <span class="text-gray-400 dark:text-gray-500 font-bold text-lg">%</span>
                         </div>

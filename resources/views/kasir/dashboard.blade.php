@@ -43,10 +43,10 @@
         </div>
 
         <!-- Live Antrian Toko (Offline/Online) -->
-        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden transition-colors mb-6">
-            <div class="px-6 py-5 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center transition-colors bg-gradient-to-r from-gray-50 to-white dark:from-slate-800 dark:to-slate-900">
-                <div class="flex items-center">
-                    <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center mr-3 shadow-sm relative">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden transition-colors mb-6" x-data="{ showGuideModal: false }">
+            <div class="px-6 py-5 border-b border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between sm:items-center transition-colors bg-gradient-to-r from-gray-50 to-white dark:from-slate-800 dark:to-slate-900">
+                <div class="flex items-center mb-4 sm:mb-0">
+                    <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center mr-3 shadow-sm relative shrink-0">
                         <i class="fa-solid fa-users"></i>
                         <span class="absolute top-0 right-0 w-3 h-3 bg-red-500 border-2 border-white dark:border-slate-900 rounded-full animate-pulse"></span>
                     </div>
@@ -55,9 +55,15 @@
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Daftar pelanggan yang menunggu giliran.</p>
                     </div>
                 </div>
-                <button onclick="window.location.reload()" class="text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors flex items-center">
-                    <i class="fa-solid fa-rotate-right mr-1"></i> Segarkan
-                </button>
+                
+                <div class="flex space-x-3 w-full sm:w-auto">
+                    <button type="button" @click="showGuideModal = true" class="flex-1 sm:flex-none px-4 py-2.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 font-bold rounded-xl transition-colors border border-indigo-200 dark:border-indigo-800/50 flex items-center justify-center text-sm">
+                        <i class="fa-solid fa-circle-question mr-2"></i> Panduan
+                    </button>
+                    <button onclick="window.location.reload()" class="flex-1 sm:flex-none px-4 py-2.5 bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 font-bold rounded-xl transition-colors border border-gray-200 dark:border-slate-700 flex items-center justify-center text-sm">
+                        <i class="fa-solid fa-rotate-right mr-2"></i> Segarkan
+                    </button>
+                </div>
             </div>
             
             <div class="overflow-x-auto">
@@ -127,6 +133,47 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+
+            {{-- MODAL PANDUAN KASIR --}}
+            <div x-show="showGuideModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                    <div x-show="showGuideModal" x-transition.opacity class="fixed inset-0 bg-gray-900 bg-opacity-60 dark:bg-opacity-80 transition-opacity" @click="showGuideModal = false" aria-hidden="true"></div>
+                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                    <div x-show="showGuideModal" 
+                         x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
+                         x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                         class="inline-block align-bottom bg-white dark:bg-slate-900 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full border border-gray-100 dark:border-slate-800">
+                        
+                        <div class="px-6 py-5 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center">
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center">
+                                <i class="fa-solid fa-circle-info text-indigo-500 mr-2"></i> Panduan Antrian Toko
+                            </h3>
+                            <button type="button" @click="showGuideModal = false" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors">
+                                <i class="fa-solid fa-times text-xl"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="px-6 py-6 text-sm text-gray-600 dark:text-gray-300 space-y-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0 mt-1"><i class="fa-solid fa-bullhorn text-indigo-500 dark:text-indigo-400 text-lg flex items-center justify-center w-6 text-center"></i></div>
+                                <div class="ml-3"><p><strong class="text-gray-800 dark:text-white">Panggil (Proses) Antrian</strong><br>Klik tombol "Panggil" pada antrian yang berstatus Menunggu. Di sistem pelanggan, antrian tersebut akan otomatis berubah status menjadi Diproses.</p></div>
+                            </div>
+                            <div class="flex">
+                                <div class="flex-shrink-0 mt-1"><i class="fa-solid fa-check text-green-500 dark:text-green-400 text-lg flex items-center justify-center w-6 text-center"></i></div>
+                                <div class="ml-3"><p><strong class="text-gray-800 dark:text-white">Selesaikan Antrian</strong><br>Setelah pesanan dan transaksi pelanggan tersebut diselesaikan melalui sistem POS, klik "Selesai" untuk mengakhiri antrian dari daftar.</p></div>
+                            </div>
+                            <div class="flex">
+                                <div class="flex-shrink-0 mt-1"><i class="fa-solid fa-clock-rotate-left text-orange-500 dark:text-orange-400 text-lg flex items-center justify-center w-6 text-center"></i></div>
+                                <div class="ml-3"><p><strong class="text-gray-800 dark:text-white">Pelanggan Belum Hadir</strong><br>Jika pelanggan dipanggil namun belum tiba di toko (untuk antrian online), Anda bisa memanggil antrian selanjutnya terlebih dahulu dan membiarkan antrian tersebut tetap berstatus Menunggu.</p></div>
+                            </div>
+                        </div>
+                        
+                        <div class="px-6 py-4 bg-gray-50 dark:bg-slate-800/80 rounded-b-2xl border-t border-gray-100 dark:border-slate-800 text-center">
+                            <button type="button" @click="showGuideModal = false" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-md transition-colors text-sm w-full sm:w-auto">Mengerti</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 

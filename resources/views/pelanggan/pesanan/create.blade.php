@@ -15,14 +15,70 @@
                 @csrf
 
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Pilih Jenis Layanan <span class="text-red-500">*</span></label>
-                    <select name="id_layanan" required class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-sm shadow-sm transition-colors">
-                        <option value="" disabled selected>-- Pilih Layanan --</option>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Pilih Jenis Layanan <span class="text-red-500">*</span></label>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         @foreach($layanan as $lyn)
-                            <option value="{{ $lyn->id }}">{{ $lyn->nama_layanan }} (Rp {{ number_format($lyn->harga_satuan, 0, ',', '.') }} / {{ $lyn->satuan }})</option>
+                            <label class="block relative cursor-pointer h-full group">
+                                <input type="radio" name="id_layanan" value="{{ $lyn->id }}" class="peer sr-only" required {{ old('id_layanan') == $lyn->id ? 'checked' : '' }}>
+                                
+                                <div class="h-full p-5 rounded-2xl border-2 border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-blue-300 dark:hover:border-slate-600 transition-all peer-checked:border-blue-600 dark:peer-checked:border-blue-500 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-900/20 shadow-sm flex flex-col justify-center relative overflow-hidden group-hover:shadow-md">
+                                    
+                                    <!-- Decoration -->
+                                    <div class="absolute -right-6 -top-6 w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-full opacity-0 peer-checked:opacity-100 transition-opacity"></div>
+                                    
+                                    <div class="relative z-10 pr-6">
+                                        <h4 class="font-bold text-gray-900 dark:text-white text-base mb-1">{{ $lyn->nama_layanan }}</h4>
+                                        <p class="text-blue-600 dark:text-blue-400 font-bold text-sm">Rp {{ number_format($lyn->harga_satuan, 0, ',', '.') }} <span class="text-xs text-gray-500 dark:text-gray-400 font-normal">/ {{ $lyn->satuan }}</span></p>
+                                    </div>
+                                </div>
+                                
+                                <div class="absolute top-5 right-5 text-blue-600 dark:text-blue-400 opacity-0 peer-checked:opacity-100 transition-all duration-300 scale-50 peer-checked:scale-100 z-20">
+                                    <i class="fa-solid fa-circle-check text-xl bg-white dark:bg-slate-900 rounded-full"></i>
+                                </div>
+                            </label>
                         @endforeach
-                    </select>
-                    @error('id_layanan') <p class="text-red-500 dark:text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+                    @error('id_layanan') <p class="text-red-500 dark:text-red-400 text-xs mt-2">{{ $message }}</p> @enderror
+                </div>
+
+                <!-- Spesifikasi Cetak -->
+                <div class="bg-gray-50 dark:bg-slate-800/50 p-5 rounded-2xl border border-gray-200 dark:border-slate-700 space-y-4">
+                    <h4 class="text-sm font-bold text-gray-800 dark:text-white flex items-center"><i class="fa-solid fa-sliders text-blue-500 mr-2"></i> Spesifikasi Cetakan</h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <!-- Jumlah Rangkap -->
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Jumlah Rangkap <span class="text-red-500">*</span></label>
+                            <div x-data="{ count: {{ old('jumlah_rangkap', 1) }} }" class="flex items-center">
+                                <button type="button" @click="if(count > 1) count--" class="w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-l-xl hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors text-gray-700 dark:text-gray-300">
+                                    <i class="fa-solid fa-minus"></i>
+                                </button>
+                                <input type="number" name="jumlah_rangkap" x-model="count" min="1" required readonly class="w-full h-10 text-center border-y border-x-0 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-800 dark:text-white focus:ring-0 focus:outline-none text-sm font-bold">
+                                <button type="button" @click="count++" class="w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-r-xl hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors text-gray-700 dark:text-gray-300">
+                                    <i class="fa-solid fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Warna Cetak -->
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Warna Cetak <span class="text-red-500">*</span></label>
+                            <select name="warna_cetak" required class="w-full h-10 px-3 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                <option value="Hitam Putih" {{ old('warna_cetak') == 'Hitam Putih' ? 'selected' : '' }}>Hitam Putih</option>
+                                <option value="Warna" {{ old('warna_cetak') == 'Warna' ? 'selected' : '' }}>Warna</option>
+                            </select>
+                        </div>
+
+                        <!-- Sisi Cetak -->
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Sisi Cetak <span class="text-red-500">*</span></label>
+                            <select name="sisi_cetak" required class="w-full h-10 px-3 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                <option value="Satu Sisi" {{ old('sisi_cetak') == 'Satu Sisi' ? 'selected' : '' }}>Satu Sisi</option>
+                                <option value="Bolak Balik" {{ old('sisi_cetak') == 'Bolak Balik' ? 'selected' : '' }}>Bolak Balik</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
                 <div>
@@ -40,9 +96,13 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Catatan Pengerjaan <span class="text-gray-400 font-normal">(Opsional)</span></label>
-                    <textarea name="catatan" rows="3" placeholder="Contoh: Tolong print rangkap 3, dijilid lakban bening ya..." class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-sm shadow-sm transition-colors">{{ old('catatan') }}</textarea>
-                    @error('catatan') <p class="text-red-500 dark:text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Catatan Pengerjaan <span class="text-gray-400 font-normal">(Opsional)</span></label>
+                    <p class="text-xs text-blue-600 dark:text-blue-400 mb-2 font-medium bg-blue-50 dark:bg-blue-900/30 p-2.5 rounded-xl border border-blue-100 dark:border-blue-800/50 flex items-start">
+                        <i class="fa-solid fa-circle-info mt-0.5 mr-2"></i>
+                        <span>Instruksi: Tuliskan instruksi tambahan di bawah jika diperlukan.<br><span class="opacity-80">Contoh: Tolong dijilid lakban bening, halaman 1-5 dicetak warna, sisanya hitam putih.</span></span>
+                    </p>
+                    <textarea name="catatan_tambahan" rows="3" placeholder="Ketik catatan atau instruksi khusus Anda di sini..." class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-sm shadow-sm transition-colors">{{ old('catatan_tambahan') }}</textarea>
+                    @error('catatan_tambahan') <p class="text-red-500 dark:text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <hr class="border-gray-100 dark:border-slate-800 my-4 transition-colors">

@@ -45,9 +45,11 @@
             // Badge counts
             $membershipMenunggu = \App\Models\Membership::where('status', 'menunggu')->count();
             $pesananSiapDiambil = \App\Models\Pesanan::where('status', 'Siap Diambil')->count();
+            $pesananMenunggu = \App\Models\Pesanan::where('status', 'Menunggu')->count();
 
             $adminMenus = [
                 ['type' => 'link', 'route' => 'admin.dashboard', 'pattern' => 'admin.dashboard', 'icon' => 'fa-chart-pie', 'label' => 'Dasbor Analytics', 'badge' => 0],
+                ['type' => 'link', 'route' => 'admin.pesanan.masuk', 'pattern' => 'admin.pesanan.*', 'icon' => 'fa-cart-shopping', 'label' => 'Pesanan Online', 'badge' => $pesananMenunggu],
                 ['type' => 'group', 'pattern' => 'admin.barang.*|admin.layanan.*|admin.pengeluaran.*', 'icon' => 'fa-database', 'label' => 'Keuangan & Master', 'badge' => 0, 'children' => [
                     ['route' => 'admin.barang.index', 'pattern' => 'admin.barang.*', 'label' => 'Stok Barang ATK'],
                     ['route' => 'admin.layanan.index', 'pattern' => 'admin.layanan.*', 'label' => 'Tarif Layanan'],

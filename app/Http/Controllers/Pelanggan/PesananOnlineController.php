@@ -21,9 +21,12 @@ class PesananOnlineController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'id_layanan'   => 'required|exists:layanans,id',
-            'file_dokumen' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120', // Maks 5MB
-            'catatan'      => 'nullable|string|max:500',
+            'id_layanan'       => 'required|exists:layanans,id',
+            'file_dokumen'     => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120', // Maks 5MB
+            'jumlah_rangkap'   => 'required|integer|min:1',
+            'warna_cetak'      => 'required|string',
+            'sisi_cetak'       => 'required|string',
+            'catatan_tambahan' => 'nullable|string|max:500',
         ], [
             'file_dokumen.mimes' => 'Format file harus PDF, Word, atau Gambar.',
             'file_dokumen.max'   => 'Ukuran file maksimal adalah 5MB.',
@@ -32,11 +35,15 @@ class PesananOnlineController extends Controller
         // Menyimpan file ke dalam folder storage/app/public/dokumen_pesanan
         $filePath = $request->file('file_dokumen')->store('dokumen_pesanan', 'public');
 
+        // Gabungkan spesifikasi cetak ke dalam catatan
+        $spek = "Rangkap: {$request->jumlah_rangkap} | Warna: {$request->warna_cetak} | Sisi: {$request->sisi_cetak}";
+        $catatanFinal = $request->catatan_tambahan ? $spek . "\nCatatan Tambahan:\n" . $request->catatan_tambahan : $spek;
+
         Pesanan::create([
             'id_pelanggan' => Auth::id(),
             'id_layanan'   => $request->id_layanan,
             'file_dokumen' => $filePath,
-            'catatan'      => $request->catatan,
+            'catatan'      => $catatanFinal,
             'status'       => 'Menunggu',
         ]);
 

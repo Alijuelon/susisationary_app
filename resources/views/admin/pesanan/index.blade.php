@@ -25,7 +25,7 @@
 
         <!-- Filter Area -->
         <div class="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl p-4 mb-6 shadow-sm">
-            <form action="{{ route('kasir.pesanan.masuk') }}" method="GET" class="flex flex-wrap md:flex-nowrap gap-3 items-center w-full">
+            <form action="{{ route('admin.pesanan.masuk') }}" method="GET" class="flex flex-wrap md:flex-nowrap gap-3 items-center w-full">
                 <div class="w-full sm:w-auto">
                     <input type="date" name="tgl_mulai" value="{{ request('tgl_mulai') }}" class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 block w-full p-2.5 text-gray-900 dark:text-white" title="Dari Tanggal">
                 </div>
@@ -53,7 +53,7 @@
                     Filter
                 </button>
                 @if(request('search') || request('status') || request('tgl_mulai') || request('tgl_akhir'))
-                    <a href="{{ route('kasir.pesanan.masuk') }}" class="w-full sm:w-auto text-center px-4 py-2.5 text-sm font-bold text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/20 rounded-xl transition-colors">Reset</a>
+                    <a href="{{ route('admin.pesanan.masuk') }}" class="w-full sm:w-auto text-center px-4 py-2.5 text-sm font-bold text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/20 rounded-xl transition-colors">Reset</a>
                 @endif
             </form>
         </div>
@@ -70,7 +70,7 @@
             </button>
         </div>
 
-        <form action="{{ route('kasir.pesanan.destroyBulk') }}" method="POST" id="bulkDeleteForm" style="display: none;">
+        <form action="{{ route('admin.pesanan.destroyBulk') }}" method="POST" id="bulkDeleteForm" style="display: none;">
             @csrf
             @method('DELETE')
             <template x-for="id in selectedIds">
@@ -156,7 +156,7 @@
                                         <button type="button" @click="openStatusModal({{ json_encode($item) }})" class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-colors shadow-sm inline-flex items-center">
                                             Status
                                         </button>
-                                        <form action="{{ route('kasir.pesanan.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pesanan online ini?');" class="inline-block m-0">
+                                        <form action="{{ route('admin.pesanan.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pesanan online ini?');" class="inline-block m-0">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white dark:hover:bg-red-600 dark:hover:text-white px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-colors shadow-sm inline-flex items-center border border-transparent" title="Hapus Pesanan">
@@ -195,7 +195,7 @@
                 <div x-show="showStatusModal" x-transition.opacity class="fixed inset-0 bg-gray-900 bg-opacity-60 dark:bg-opacity-80 transition-opacity" @click="showStatusModal = false" aria-hidden="true"></div>
                 <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-                                     <div x-show="showStatusModal" 
+                <div x-show="showStatusModal" 
                      x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
                      x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
                      class="inline-block align-bottom bg-white dark:bg-slate-900 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-sm w-full border border-gray-100 dark:border-slate-800">
@@ -207,7 +207,7 @@
                         </button>
                     </div>
 
-                    <form x-bind:action="`{{ url('kasir/pesanan-masuk') }}/${orderItem.id}/status`" method="POST">
+                    <form x-bind:action="`{{ url('admin/pesanan-masuk') }}/${orderItem.id}/status`" method="POST">
                         @csrf
                         @method('PATCH')
                         <div class="px-6 py-6">
@@ -231,7 +231,7 @@
                                     <span class="text-sm font-bold text-gray-700 dark:text-gray-300">Siap Diambil / Selesai Dicetak</span>
                                 </label>
 
-                                <label class="flex items-center p-3 border border-gray-200 dark:border-slate-700 rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors" :class="orderItem.status == 'Selesai' ? 'border-green-500 bg-green-50 dark:bg-green-900/10 dark:border-green-500' :                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ''">
+                                <label class="flex items-center p-3 border border-gray-200 dark:border-slate-700 rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors" :class="orderItem.status == 'Selesai' ? 'border-green-500 bg-green-50 dark:bg-green-900/10 dark:border-green-500' : ''">
                                     <input type="radio" name="status" value="Selesai" x-model="orderItem.status" class="text-green-600 focus:ring-green-500 bg-white dark:bg-slate-900 dark:border-slate-600 mr-3">
                                     <span class="text-sm font-bold text-gray-700 dark:text-gray-300">Selesai (Sudah diambil & dibayar)</span>
                                 </label>
@@ -248,4 +248,4 @@
         </div>
 
     </div>
-</x-app-layout>                                                                                                                                                                                                                                                                                                                                                                             
+</x-app-layout>

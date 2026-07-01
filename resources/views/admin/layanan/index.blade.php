@@ -42,7 +42,7 @@
                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <i class="fa-solid fa-search text-gray-400"></i>
                     </div>
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama layanan atau produk..." class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 block w-full pl-10 p-2.5 dark:text-white">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama layanan atau produk..." class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 block w-full pl-10 p-2.5 text-gray-900 dark:text-white">
                 </div>
                 <button type="submit" class="w-full sm:w-auto bg-gray-900 dark:bg-slate-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-800 dark:hover:bg-slate-600 transition-colors shadow-sm">
                     Cari
@@ -52,42 +52,6 @@
                 @endif
             </form>
         </div>
-
-        @if(session('success'))
-            <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)" class="mb-6 bg-green-500 text-white px-5 py-4 rounded-xl shadow-md flex items-center justify-between transition-all">
-                <div class="flex items-center space-x-3">
-                    <i class="fa-solid fa-circle-check text-xl"></i>
-                    <p class="font-bold text-sm">{{ session('success') }}</p>
-                </div>
-                <button @click="show = false" class="text-white hover:text-green-200">
-                    <i class="fa-solid fa-times"></i>
-                </button>
-            </div>
-        @endif
-
-        @if($errors->any())
-            <div class="mb-6 bg-red-100 text-red-600 px-5 py-4 rounded-xl shadow-sm border border-red-200 flex items-start space-x-3">
-                <i class="fa-solid fa-circle-exclamation text-lg mt-0.5"></i>
-                <div>
-                    <p class="font-bold text-sm mb-1">Terjadi Kesalahan Validasi!</p>
-                    <ul class="text-xs list-disc list-inside">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" class="mb-6 bg-red-500 dark:bg-red-600 text-white px-5 py-4 rounded-xl shadow-md flex items-center justify-between transition-all">
-                <div class="flex items-center space-x-3">
-                    <i class="fa-solid fa-triangle-exclamation text-xl"></i>
-                    <p class="font-bold text-sm">{{ session('error') }}</p>
-                </div>
-                <button @click="show = false" class="text-white hover:text-red-200"><i class="fa-solid fa-times"></i></button>
-            </div>
-        @endif
 
         <!-- Bulk Delete Action Bar -->
         <div x-show="selectedIds.length > 0" style="display: none;" x-transition class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-2xl p-4 mb-4 flex flex-col sm:flex-row justify-between items-center shadow-sm">

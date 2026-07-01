@@ -123,6 +123,17 @@
                         'link' => route('admin.membership.index'),
                     ];
                 }
+                // Pesanan online masuk
+                $pesananMenunggu = \App\Models\Pesanan::where('status', 'Menunggu')->count();
+                if ($pesananMenunggu > 0) {
+                    $notifications[] = [
+                        'icon' => 'fa-cart-shopping',
+                        'iconColor' => 'text-blue-500',
+                        'title' => 'Pesanan Online Masuk!',
+                        'message' => 'Ada ' . $pesananMenunggu . ' pesanan online baru menunggu diproses.',
+                        'link' => route('admin.dashboard'),
+                    ];
+                }
             } elseif ($userRole === 'kasir') {
                 // Pesanan siap diambil
                 $pesananSiap = \App\Models\Pesanan::where('status', 'Siap Diambil')->count();
@@ -340,6 +351,66 @@
             </div>
         </div>
     </div>
+
+    <!-- Global Toast Notification -->
+    <div x-data="{ show: false, message: '' }" 
+         @notify.window="message = $event.detail; show = true; setTimeout(() => show = false, 5000)"
+         x-show="show" x-transition.opacity style="display: none;"
+         class="fixed bottom-5 right-5 z-50 bg-blue-600 text-white px-6 py-4 rounded-xl shadow-xl flex items-center space-x-3 cursor-pointer"
+         @click="window.location.reload()">
+         <i class="fa-solid fa-bell text-xl animate-bounce"></i>
+         <p class="font-bold text-sm" x-text="message"></p>
+         <button @click.stop="show = false" class="text-white hover:text-blue-200 ml-4 focus:outline-none">
+             <i class="fa-solid fa-times text-lg"></i>
+         </button>
+    </div>
+
+    <!-- Real-time Order Notification Script untuk Admin -->
+    @if(Auth::check() && Auth::user()->role === 'admin')
+    <div x-data="orderNotifier()" x-init="initNotifier()"></div>
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('orderNotifier', () => ({
+                lastCount: {{ \App\Models\Pesanan::where('status', 'Menunggu')->count() }},
+                playBeep() {
+                    try {
+                        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                        const osc = ctx.createOscillator();
+                        const gainNode = ctx.createGain();
+                        osc.connect(gainNode);
+                        gainNode.connect(ctx.destination);
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(880, ctx.currentTime);
+                        gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+                        osc.start();
+                        gainNode.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.5);
+                        osc.stop(ctx.currentTime + 0.5);
+                    } catch(e) {
+                        console.log('Audio error:', e);
+                    }
+                },
+                initNotifier() {
+                    setInterval(() => {
+                        fetch('{{ route("admin.api.cek-pesanan") }}')
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.count > this.lastCount) {
+                                    this.lastCount = data.count;
+                                    this.playBeep();
+                                    window.dispatchEvent(new CustomEvent('notify', {
+                                        detail: 'Ada ' + data.count + ' pesanan online baru masuk! Klik untuk muat ulang.'
+                                    }));
+                                } else if (data.count < this.lastCount) {
+                                    this.lastCount = data.count;
+                                }
+                            })
+                            .catch(e => console.error('Error fetching notification:', e));
+                    }, 5000); // Polling tiap 5 detik
+                }
+            }));
+        });
+    </script>
+    @endif
 
     @include('layouts.profil')
 </body>

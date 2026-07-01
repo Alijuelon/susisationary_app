@@ -40,9 +40,9 @@
             <form method="GET" action="{{ route('pelanggan.riwayat') }}" class="flex flex-col md:flex-row gap-3 items-center w-full">
                 <!-- Filter Tanggal -->
                 <div class="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
-                    <input type="date" name="tgl_mulai" value="{{ request('tgl_mulai') }}" class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 block w-full p-2.5 dark:text-white">
+                    <input type="date" name="tgl_mulai" value="{{ request('tgl_mulai') }}" class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 block w-full p-2.5 text-gray-900 dark:text-white">
                     <span class="text-gray-500 dark:text-gray-400 font-medium">s/d</span>
-                    <input type="date" name="tgl_akhir" value="{{ request('tgl_akhir') }}" class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 block w-full p-2.5 dark:text-white">
+                    <input type="date" name="tgl_akhir" value="{{ request('tgl_akhir') }}" class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 block w-full p-2.5 text-gray-900 dark:text-white">
                 </div>
 
                 <div class="relative w-full md:flex-1">
@@ -119,6 +119,19 @@
                                     @elseif($item->status === 'Siap Diambil') <span class="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-colors">Siap Diambil</span>
                                     @elseif($item->status === 'Selesai') <span class="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-colors">Selesai</span>
                                     @else <span class="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-colors">{{ $item->status }}</span>
+                                    @endif
+
+                                    @if($item->status === 'Menunggu' || $item->status === 'Diproses')
+                                        @php
+                                            $antreanDepan = \App\Models\Pesanan::whereIn('status', ['Menunggu', 'Diproses'])
+                                                ->where('created_at', '<', $item->created_at)
+                                                ->count();
+                                        @endphp
+                                        <div class="mt-2 flex justify-center">
+                                            <span class="inline-flex items-center px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-400 rounded text-[9px] font-bold shadow-sm transition-colors whitespace-nowrap">
+                                                <i class="fa-solid fa-people-arrows mr-1"></i> {{ $antreanDepan == 0 ? 'Giliran Anda Berikutnya' : $antreanDepan . ' Antrean Di Depan' }}
+                                            </span>
+                                        </div>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-right">

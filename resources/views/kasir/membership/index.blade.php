@@ -8,6 +8,12 @@
         openDeleteModal(name, url) {
             this.deleteItem = { name: name, url: url };
             this.showDeleteModal = true;
+        },
+        showConfirmModal: false,
+        confirmData: { message: '', url: '', method: '', btnClass: '', iconClass: '', title: '' },
+        openConfirmModal(title, message, url, method, btnClass, iconClass) {
+            this.confirmData = { title, message, url, method, btnClass, iconClass };
+            this.showConfirmModal = true;
         }
     }">
         <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 transition-colors">Kelola permohonan membership pelanggan. Anda dapat menyetujui permohonan baru.</p>
@@ -17,9 +23,9 @@
             <form method="GET" action="{{ route('kasir.membership.index') }}" class="flex flex-col md:flex-row gap-3 items-center w-full">
                 <!-- Filter Tanggal -->
                 <div class="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
-                    <input type="date" name="tgl_mulai" value="{{ request('tgl_mulai') }}" class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 block w-full p-2.5 dark:text-white">
+                    <input type="date" name="tgl_mulai" value="{{ request('tgl_mulai') }}" class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 block w-full p-2.5 text-gray-900 dark:text-white">
                     <span class="text-gray-500 dark:text-gray-400 font-medium">s/d</span>
-                    <input type="date" name="tgl_akhir" value="{{ request('tgl_akhir') }}" class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 block w-full p-2.5 dark:text-white">
+                    <input type="date" name="tgl_akhir" value="{{ request('tgl_akhir') }}" class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 block w-full p-2.5 text-gray-900 dark:text-white">
                 </div>
 
                 <div class="relative w-full md:flex-1">
@@ -27,10 +33,10 @@
                         <i class="fa-solid fa-search text-gray-400 dark:text-gray-500"></i>
                     </div>
                     <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Cari nama atau nomor kartu..."
-                        class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 block w-full pl-10 p-2.5 transition-colors">
+                        class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-gray-900 dark:text-gray-300 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 block w-full pl-10 p-2.5 transition-colors">
                 </div>
 
-                <select name="status" class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 p-2.5 w-full sm:w-auto transition-colors">
+                <select name="status" class="bg-gray-50 dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-gray-900 dark:text-gray-300 text-sm rounded-xl focus:ring-gray-900 focus:border-gray-900 p-2.5 w-full sm:w-auto transition-colors">
                     <option value="semua" {{ (request('status') ?? '') === 'semua' ? 'selected' : '' }}>Semua Status</option>
                     <option value="menunggu" {{ (request('status') ?? '') === 'menunggu' ? 'selected' : '' }}>Menunggu</option>
                     <option value="aktif" {{ (request('status') ?? '') === 'aktif' ? 'selected' : '' }}>Aktif</option>
@@ -76,9 +82,13 @@
             </button>
         </div>
 
-        <form action="{{ route('kasir.membership.destroyBulk') }}" method="POST" id="bulkDeleteForm">
+        <form action="{{ route('kasir.membership.destroyBulk') }}" method="POST" id="bulkDeleteForm" class="hidden">
             @csrf
             @method('DELETE')
+            <template x-for="id in selectedIds" :key="id">
+                <input type="hidden" name="selected_ids[]" :value="id">
+            </template>
+        </form>
 
         {{-- Tabel --}}
         <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden transition-colors">
@@ -117,12 +127,9 @@
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end space-x-2">
                                         @if($m->status === 'menunggu')
-                                            <form action="{{ route('kasir.membership.approve', $m->id) }}" method="POST" class="inline" onsubmit="return confirm('Setujui membership ini?')">
-                                                @csrf @method('PATCH')
-                                                <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/50 transition-colors" title="Setujui Membership">
-                                                    <i class="fa-solid fa-check"></i>
-                                                </button>
-                                            </form>
+                                            <button type="button" @click="openConfirmModal('Setujui Membership', 'Apakah Anda yakin ingin menyetujui membership atas nama {{ addslashes($m->pelanggan->nama_lengkap ?? 'Unknown') }}?', '{{ route('kasir.membership.approve', $m->id) }}', 'PATCH', 'bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600 text-white', 'fa-check text-green-500 dark:text-green-400')" class="w-8 h-8 flex items-center justify-center rounded-lg bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/50 transition-colors" title="Setujui Membership">
+                                                <i class="fa-solid fa-check"></i>
+                                            </button>
                                         @endif
                                         <button type="button" @click="openDeleteModal('{{ addslashes($m->pelanggan->nama_lengkap ?? 'Unknown') }}', '{{ route('kasir.membership.destroy', $m->id) }}')" class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-400 flex items-center justify-center hover:bg-red-500 hover:text-white dark:hover:bg-red-500 dark:hover:text-white transition-colors border border-transparent" title="Hapus Membership">
                                             <i class="fa-solid fa-trash"></i>
@@ -149,7 +156,6 @@
             </div>
             
         </div>
-        </form>
 
         @if($memberships->hasPages())
             <div class="mb-8 mt-6">
@@ -185,6 +191,37 @@
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="w-full px-5 py-2.5 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 shadow-md transition-colors text-sm">Ya, Hapus</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- MODAL KONFIRMASI (SETUJUI DLL) --}}
+        <div x-show="showConfirmModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div x-show="showConfirmModal" x-transition.opacity class="fixed inset-0 bg-gray-900 bg-opacity-60 dark:bg-opacity-80 transition-opacity" @click="showConfirmModal = false" aria-hidden="true"></div>
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                <div x-show="showConfirmModal" 
+                     x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
+                     x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                     class="inline-block align-bottom bg-white dark:bg-slate-900 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-sm w-full border border-gray-100 dark:border-slate-800">
+                    
+                    <div class="px-6 py-6 text-center">
+                        <div class="w-16 h-16 bg-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white dark:border-slate-800 shadow-sm transition-colors">
+                            <i class="fa-solid text-2xl" :class="confirmData.iconClass"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2" x-text="confirmData.title">Konfirmasi</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400" x-text="confirmData.message"></p>
+                    </div>
+
+                    <div class="px-6 py-4 bg-gray-50 dark:bg-slate-800/80 flex justify-center space-x-3 rounded-b-2xl border-t border-gray-100 dark:border-slate-800 transition-colors">
+                        <button type="button" @click="showConfirmModal = false" class="w-1/2 px-5 py-2.5 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors text-sm">Batal</button>
+                        
+                        <form x-bind:action="confirmData.url" method="POST" class="w-1/2 m-0">
+                            @csrf
+                            <input type="hidden" name="_method" x-bind:value="confirmData.method">
+                            <button type="submit" class="w-full px-5 py-2.5 rounded-xl font-bold shadow-md transition-colors text-sm" :class="confirmData.btnClass">Ya, Lanjutkan</button>
                         </form>
                     </div>
                 </div>

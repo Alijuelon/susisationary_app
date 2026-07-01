@@ -73,13 +73,6 @@
                 <td style="border: none; padding: 2px;">Total Pengeluaran</td>
                 <td style="border: none; padding: 2px;" class="text-right">Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</td>
             </tr>
-            <tr>
-                <td colspan="2" style="border: none; border-top: 1px solid #000;"></td>
-            </tr>
-            <tr>
-                <td style="border: none; padding: 2px;"><b>Laba Bersih</b></td>
-                <td style="border: none; padding: 2px;" class="text-right"><b>Rp {{ number_format($labaBersih, 0, ',', '.') }}</b></td>
-            </tr>
         </table>
     </div>
 

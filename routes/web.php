@@ -81,6 +81,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Dashboard Admin
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     
+    // API Cek Pesanan Baru
+    Route::get('/api/cek-pesanan', function () {
+        $count = \App\Models\Pesanan::where('status', 'Menunggu')->count();
+        return response()->json(['count' => $count]);
+    })->name('api.cek-pesanan');
+
     // Kelola Master Data
     Route::delete('/barang/bulk', [BarangController::class, 'destroyBulk'])->name('barang.destroyBulk');
     Route::resource('/barang', BarangController::class); // Menghasilkan route index, create, store, edit, update, destroy
@@ -108,6 +114,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::patch('/membership/{id}/approve', [AdminMembershipController::class, 'approve'])->name('membership.approve');
     Route::patch('/membership/{id}/reject', [AdminMembershipController::class, 'reject'])->name('membership.reject');
     Route::delete('/membership/{id}', [AdminMembershipController::class, 'destroy'])->name('membership.destroy');
+
+    // Kelola Antrean Pesanan Online (Admin)
+    Route::get('/pesanan-masuk', [\App\Http\Controllers\Admin\PesananMasukController::class, 'index'])->name('pesanan.masuk');
+    Route::patch('/pesanan-masuk/{id}/status', [\App\Http\Controllers\Admin\PesananMasukController::class, 'updateStatus'])->name('pesanan.updateStatus');
+    Route::delete('/pesanan-masuk/bulk', [\App\Http\Controllers\Admin\PesananMasukController::class, 'destroyBulk'])->name('pesanan.destroyBulk');
+    Route::delete('/pesanan-masuk/{id}', [\App\Http\Controllers\Admin\PesananMasukController::class, 'destroy'])->name('pesanan.destroy');
 
 });
 

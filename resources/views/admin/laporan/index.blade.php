@@ -34,7 +34,7 @@
             </form>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
             <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-slate-800 transition-colors">
                 <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Total Pemasukan</p>
                 <h3 class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">Rp {{ number_format($totalPemasukan, 0, ',', '.') }}</h3>
@@ -42,10 +42,6 @@
             <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-slate-800 transition-colors">
                 <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Total Pengeluaran</p>
                 <h3 class="text-2xl font-bold text-red-500 dark:text-red-400 mt-1">Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</h3>
-            </div>
-            <div class="bg-gradient-to-br from-gray-800 to-gray-900 dark:from-slate-700 dark:to-slate-800 rounded-2xl p-5 shadow-lg text-white transition-colors">
-                <p class="text-sm text-gray-300 dark:text-gray-400 font-medium">Laba Bersih</p>
-                <h3 class="text-2xl font-bold mt-1">Rp {{ number_format($labaBersih, 0, ',', '.') }}</h3>
             </div>
         </div>
 

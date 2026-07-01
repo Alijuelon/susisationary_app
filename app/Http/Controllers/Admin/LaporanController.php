@@ -49,10 +49,8 @@ class LaporanController extends Controller
         // 4. Hitung Rekapitulasi
         $totalPemasukan = $pemasukan->sum('nominal');
         $totalPengeluaran = $pengeluaran->sum('nominal');
-        $labaBersih = $totalPemasukan - $totalPengeluaran;
-
         return view('admin.laporan.index', compact(
-            'laporan', 'totalPemasukan', 'totalPengeluaran', 'labaBersih', 'startDate', 'endDate'
+            'laporan', 'totalPemasukan', 'totalPengeluaran', 'startDate', 'endDate'
         ));
     }
 
@@ -69,10 +67,9 @@ class LaporanController extends Controller
         $laporan = $pemasukan->concat($pengeluaran)->sortBy('tanggal'); // Cetak PDF biasanya dari tanggal terlama ke terbaru
         $totalPemasukan = $pemasukan->sum('nominal');
         $totalPengeluaran = $pengeluaran->sum('nominal');
-        $labaBersih = $totalPemasukan - $totalPengeluaran;
 
         // Catatan: Untuk merender PDF, kita akan menggunakan package dompdf nanti.
         // Untuk sekarang, kita return ke view PDF HTML murni.
-        return view('admin.laporan.pdf', compact('laporan', 'totalPemasukan', 'totalPengeluaran', 'labaBersih', 'startDate', 'endDate'));
+        return view('admin.laporan.pdf', compact('laporan', 'totalPemasukan', 'totalPengeluaran', 'startDate', 'endDate'));
     }
 }
