@@ -102,7 +102,7 @@
 
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
             
             <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-800 transition-colors flex flex-col justify-between">
                 <div class="flex justify-between items-start mb-2">
@@ -131,24 +131,6 @@
                 </div>
                 <div class="mt-auto pt-2 border-t border-gray-100 dark:border-slate-800">
                     <p class="text-[10px] text-gray-500 dark:text-gray-400"><i class="fa-solid fa-calculator text-red-500 mr-1"></i> Hari ini</p>
-                </div>
-            </div>
-
-            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-800 transition-colors flex flex-col justify-between">
-                <div class="flex justify-between items-start mb-2">
-                    @php $profitColor = $profitHariIni >= 0 ? 'from-blue-500 to-indigo-600' : 'from-orange-500 to-red-600'; @endphp
-                    <div class="w-10 h-10 bg-gradient-to-br {{ $profitColor }} rounded-xl shadow border border-blue-400/20 flex items-center justify-center text-white shrink-0">
-                        <i class="fa-solid fa-hand-holding-dollar text-sm"></i>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-1">Profit Bersih</p>
-                        <h5 class="font-bold text-lg text-gray-800 dark:text-white tracking-tight" :class="'{{ $profitHariIni >= 0 ? '' : 'text-red-500 dark:text-red-400' }}'">
-                            {{ number_format($profitHariIni / 1000, 0, ',', '.') }}K
-                        </h5>
-                    </div>
-                </div>
-                <div class="mt-auto pt-2 border-t border-gray-100 dark:border-slate-800">
-                     <p class="text-[10px] text-gray-500 dark:text-gray-400"><i class="fa-solid {{ $profitHariIni >= 0 ? 'fa-chart-line text-blue-500' : 'fa-chart-line-down text-red-500' }} mr-1"></i> Hari ini</p>
                 </div>
             </div>
 
