@@ -124,7 +124,7 @@
                     ];
                 }
                 // Pesanan online masuk
-                $pesananMenunggu = \App\Models\Pesanan::where('status', 'Menunggu')->count();
+                $pesananMenunggu = \App\Models\Transaksi::where('tipe_transaksi', 'Online')->where('status', 'Menunggu')->count();
                 if ($pesananMenunggu > 0) {
                     $notifications[] = [
                         'icon' => 'fa-cart-shopping',
@@ -136,7 +136,7 @@
                 }
             } elseif ($userRole === 'kasir') {
                 // Pesanan siap diambil
-                $pesananSiap = \App\Models\Pesanan::where('status', 'Siap Diambil')->count();
+                $pesananSiap = \App\Models\Transaksi::where('tipe_transaksi', 'Online')->where('status', 'Siap Diambil')->count();
                 if ($pesananSiap > 0) {
                     $notifications[] = [
                         'icon' => 'fa-box-open',
@@ -159,7 +159,7 @@
                 }
             } elseif ($userRole === 'pelanggan') {
                 // Pesanan yang baru diupdate (Siap Diambil)
-                $pesananReady = \App\Models\Pesanan::where('id_pelanggan', Auth::id())
+                $pesananReady = \App\Models\Transaksi::where('tipe_transaksi', 'Online')->where('id_pelanggan', Auth::id())
                     ->where('status', 'Siap Diambil')->count();
                 if ($pesananReady > 0) {
                     $notifications[] = [
@@ -371,7 +371,7 @@
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('orderNotifier', () => ({
-                lastCount: {{ \App\Models\Pesanan::where('status', 'Menunggu')->count() }},
+                lastCount: {{ \App\Models\Transaksi::where('tipe_transaksi', 'Online')->where('status', 'Menunggu')->count() }},
                 playBeep() {
                     try {
                         const ctx = new (window.AudioContext || window.webkitAudioContext)();

@@ -121,7 +121,6 @@ class PesananOnlineController extends Controller
 
         $query = Transaksi::with(['detail.layanan'])
             ->where('id_pelanggan', Auth::id())
-            ->where('tipe_transaksi', 'Online')
             ->orderBy('created_at', 'desc');
 
         if ($search) {
@@ -167,7 +166,6 @@ class PesananOnlineController extends Controller
         }
 
         $count = Transaksi::where('id_pelanggan', Auth::id())
-                        ->where('tipe_transaksi', 'Online')
                         ->where('status', 'Menunggu')
                         ->whereIn('id', $ids)
                         ->delete();

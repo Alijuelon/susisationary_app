@@ -26,8 +26,8 @@ class PelangganDashboardController extends Controller
             ->first();
 
         // Menghitung statistik
-        $totalPesanan = \App\Models\Transaksi::where('tipe_transaksi', 'Online')->where('id_pelanggan', $userId)->count();
-        $pesananSelesai = \App\Models\Transaksi::where('tipe_transaksi', 'Online')->where('id_pelanggan', $userId)->whereIn('status', ['Selesai', 'Berhasil'])->count();
+        $totalPesanan = \App\Models\Transaksi::where('id_pelanggan', $userId)->count();
+        $pesananSelesai = \App\Models\Transaksi::where('id_pelanggan', $userId)->whereIn('status', ['Selesai', 'Berhasil'])->count();
 
         return view('pelanggan.dashboard', compact('pesananAktif', 'totalPesanan', 'pesananSelesai', 'antrianAktif'));
     }

@@ -127,9 +127,9 @@
                             </td>
                             <td class="px-6 py-4 text-center">
                                 <div class="flex justify-center space-x-2">
-                                    <button type="button" @click="openReceipt({{ json_encode($item) }}, '{{ Auth::user()->nama_lengkap }}')" class="bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-gray-900 dark:hover:bg-gray-200 hover:text-white dark:hover:text-slate-900 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors inline-flex items-center border border-transparent dark:border-slate-700">
-                                        <i class="fa-solid fa-receipt mr-1.5"></i> Detail
-                                    </button>
+                                    <a href="{{ route('kasir.pos.struk', $item->id) }}" target="_blank" class="bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-gray-900 dark:hover:bg-gray-200 hover:text-white dark:hover:text-slate-900 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors inline-flex items-center border border-transparent dark:border-slate-700">
+                                        <i class="fa-solid fa-receipt mr-1.5"></i> Struk
+                                    </a>
                                     <form action="{{ route('kasir.riwayat.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus transaksi penjualan ini?');">
                                         @csrf
                                         @method('DELETE')

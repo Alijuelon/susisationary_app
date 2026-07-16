@@ -83,7 +83,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     
     // API Cek Pesanan Baru
     Route::get('/api/cek-pesanan', function () {
-        $count = \App\Models\Pesanan::where('status', 'Menunggu')->count();
+        $count = \App\Models\Transaksi::where('tipe_transaksi', 'Online')->where('status', 'Menunggu')->count();
         return response()->json(['count' => $count]);
     })->name('api.cek-pesanan');
 
