@@ -176,8 +176,14 @@
                     <tbody class="text-sm text-gray-600 dark:text-gray-300 divide-y divide-gray-100 dark:divide-slate-800/80">
                         @forelse($pesananAktif ?? [] as $item)
                             <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
-                                <td class="px-6 py-4 font-bold text-gray-800 dark:text-white">#{{ $item->id }}</td>
-                                <td class="px-6 py-4">{{ $item->layanan->nama_layanan ?? 'Custom' }}</td>
+                                <td class="px-6 py-4 font-bold text-gray-800 dark:text-white">#{{ $item->kode_transaksi }}</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex flex-col gap-1">
+                                    @foreach($item->detail as $dt)
+                                        <span class="text-xs bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 px-2 py-1 rounded w-max">{{ $dt->layanan->nama_layanan ?? 'Custom' }} (x{{ $dt->qty }})</span>
+                                    @endforeach
+                                    </div>
+                                </td>
                                 <td class="px-6 py-4 text-xs text-gray-500 dark:text-gray-400">{{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}</td>
                                 <td class="px-6 py-4 text-center">
                                     @if($item->status === 'Menunggu') <span class="bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-400 px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-colors"><i class="fa-solid fa-hourglass-half mr-1"></i> Menunggu</span>

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Pelanggan;
 
 use App\Http\Controllers\Controller;
-use App\Models\Pesanan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -14,7 +13,8 @@ class PelangganDashboardController extends Controller
         $userId = Auth::id();
 
         // Mengambil pesanan yang masih berjalan (belum selesai/batal)
-        $pesananAktif = Pesanan::with('layanan')
+        $pesananAktif = \App\Models\Transaksi::with('detail.layanan')
+            ->where('tipe_transaksi', 'Online')
             ->where('id_pelanggan', $userId)
             ->whereIn('status', ['Menunggu', 'Diproses', 'Siap Diambil'])
             ->orderBy('created_at', 'desc')
@@ -26,8 +26,8 @@ class PelangganDashboardController extends Controller
             ->first();
 
         // Menghitung statistik
-        $totalPesanan = Pesanan::where('id_pelanggan', $userId)->count();
-        $pesananSelesai = Pesanan::where('id_pelanggan', $userId)->where('status', 'Selesai')->count();
+        $totalPesanan = \App\Models\Transaksi::where('tipe_transaksi', 'Online')->where('id_pelanggan', $userId)->count();
+        $pesananSelesai = \App\Models\Transaksi::where('tipe_transaksi', 'Online')->where('id_pelanggan', $userId)->whereIn('status', ['Selesai', 'Berhasil'])->count();
 
         return view('pelanggan.dashboard', compact('pesananAktif', 'totalPesanan', 'pesananSelesai', 'antrianAktif'));
     }

@@ -102,7 +102,7 @@
                                     <input type="checkbox" name="selected_ids[]" value="{{ $item->id }}" x-model="selectedIds" class="rounded border-gray-300 text-red-600 focus:ring-red-500 bg-white dark:bg-slate-900">
                                 </td>
                                 <td class="px-4 py-3 whitespace-nowrap align-middle">
-                                    <span class="font-bold text-gray-800 dark:text-white">#{{ $item->id }}</span> <br>
+                                    <span class="font-bold text-gray-800 dark:text-white">#{{ $item->kode_transaksi }}</span> <br>
                                     <span class="text-[11px] text-gray-500 dark:text-gray-400">{{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}</span>
                                     @if($item->status === 'Menunggu' && $firstMenunggu && request('page', 1) == 1)
                                         @php $firstMenunggu = false; @endphp
@@ -115,27 +115,37 @@
                                 </td>
                                 <td class="px-4 py-3 font-bold text-gray-800 dark:text-white align-middle">{{ $item->pelanggan->nama_lengkap ?? 'Anonim' }}</td>
                                 <td class="px-4 py-3 align-middle">
-                                    <div class="max-w-[200px] sm:max-w-xs md:max-w-sm">
-                                        <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded text-xs font-bold transition-colors inline-block mb-1">{{ $item->layanan->nama_layanan ?? 'Custom' }}</span>
-                                        @if($item->catatan)
-                                            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed break-words">"{{ $item->catatan }}"</p>
-                                        @endif
+                                    <div class="max-w-[200px] sm:max-w-xs md:max-w-sm space-y-2">
+                                        @foreach($item->detail as $dt)
+                                        <div class="border-b border-gray-100 dark:border-slate-800 pb-2 last:border-0 last:pb-0">
+                                            <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded text-xs font-bold transition-colors inline-block mb-1">{{ $dt->layanan->nama_layanan ?? 'Custom' }} (x{{ $dt->qty }})</span>
+                                            @if($dt->catatan)
+                                                <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed break-words">"{{ $dt->catatan }}"</p>
+                                            @endif
+                                        </div>
+                                        @endforeach
                                     </div>
                                 </td>
                                 <td class="px-4 py-3 text-center align-middle">
-                                    @php
-                                        $ext = strtolower(pathinfo($item->file_dokumen, PATHINFO_EXTENSION));
-                                        $isDoc = in_array($ext, ['doc', 'docx']);
-                                        $fileUrl = asset('storage/' . $item->file_dokumen);
-                                        $viewUrl = $isDoc ? 'https://docs.google.com/viewer?url=' . urlencode($fileUrl) : $fileUrl;
-                                    @endphp
-                                    <div class="flex justify-center space-x-2">
-                                        <a href="{{ $viewUrl }}" target="_blank" class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-600 dark:hover:bg-blue-500 hover:text-white text-blue-600 dark:text-blue-400 rounded-lg transition-colors" title="Lihat & Cetak">
-                                            <i class="fa-solid fa-print"></i>
-                                        </a>
-                                        <a href="{{ $fileUrl }}" download class="inline-flex items-center justify-center w-8 h-8 bg-gray-100 dark:bg-slate-800 hover:bg-gray-900 dark:hover:bg-gray-200 hover:text-white dark:hover:text-slate-900 text-gray-600 dark:text-gray-400 rounded-lg transition-colors" title="Download File">
-                                            <i class="fa-solid fa-download"></i>
-                                        </a>
+                                    <div class="flex flex-col space-y-2 items-center">
+                                        @foreach($item->detail as $dt)
+                                        @if($dt->file_dokumen)
+                                        @php
+                                            $ext = strtolower(pathinfo($dt->file_dokumen, PATHINFO_EXTENSION));
+                                            $isDoc = in_array($ext, ['doc', 'docx']);
+                                            $fileUrl = asset('storage/' . $dt->file_dokumen);
+                                            $viewUrl = $isDoc ? 'https://docs.google.com/viewer?url=' . urlencode($fileUrl) : $fileUrl;
+                                        @endphp
+                                        <div class="flex justify-center space-x-1 border border-gray-200 dark:border-slate-700 rounded-lg p-1 bg-white dark:bg-slate-800" title="{{ $dt->layanan->nama_layanan ?? 'File' }}">
+                                            <a href="{{ $viewUrl }}" target="_blank" class="inline-flex items-center justify-center w-7 h-7 bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-600 hover:text-white text-blue-600 rounded-md transition-colors">
+                                                <i class="fa-solid fa-eye text-xs"></i>
+                                            </a>
+                                            <a href="{{ $fileUrl }}" download class="inline-flex items-center justify-center w-7 h-7 bg-gray-100 dark:bg-slate-700 hover:bg-gray-900 hover:text-white text-gray-600 rounded-md transition-colors">
+                                                <i class="fa-solid fa-download text-xs"></i>
+                                            </a>
+                                        </div>
+                                        @endif
+                                        @endforeach
                                     </div>
                                 </td>
                                 <td class="px-4 py-3 text-center align-middle">

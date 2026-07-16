@@ -92,16 +92,15 @@
                              class="border rounded-xl p-4 cursor-pointer transition-all">
                             <div class="flex justify-between items-start mb-2">
                                 <div>
-                                    <p class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase">Pesanan #<span x-text="order.id"></span></p>
+                                    <p class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase"><span x-text="order.kode_transaksi"></span></p>
                                     <h6 class="text-sm font-bold text-gray-800 dark:text-white mt-1" x-text="order.pelanggan?.nama_lengkap ?? 'Pelanggan'"></h6>
                                 </div>
                                 <span class="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-md text-[10px] font-bold uppercase">Siap Diambil</span>
                             </div>
-                            <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                                <span><i class="fa-solid fa-tags mr-1"></i> <span x-text="order.layanan?.nama_layanan ?? 'Layanan'"></span></span>
-                                <span class="font-bold text-blue-600 dark:text-blue-400" x-text="formatRupiah(order.layanan?.harga_satuan ?? 0)"></span>
+                            <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                <span><i class="fa-solid fa-layer-group mr-1"></i> <span x-text="order.detail ? order.detail.length : 0"></span> Item Layanan</span>
+                                <span class="font-bold text-blue-600 dark:text-blue-400" x-text="formatRupiah(order.total_harga)"></span>
                             </div>
-                            <p x-show="order.catatan" class="text-[10px] text-gray-400 dark:text-gray-500 mt-2 italic" x-text="'Catatan: ' + (order.catatan ?? '')"></p>
                         </div>
                     </template>
                 </div>
@@ -295,21 +294,20 @@
                     this.selectedOrderId = order.id;
                     this.namaPelanggan = order.pelanggan?.nama_lengkap ?? '';
 
-                    // Add locked item from online order
-                    if (order.layanan) {
-                        let qty = order.qty && order.qty > 0 ? order.qty : 1;
-                        let hargaSatuan = order.total_harga ? (order.total_harga / qty) : order.layanan.harga_satuan;
-                        
-                        this.cart.push({
-                            id: order.layanan.id,
-                            tipe: 'layanan',
-                            nama: order.layanan.nama_layanan,
-                            harga: hargaSatuan,
-                            satuan: order.layanan.satuan ?? 'unit',
-                            qty: qty,
-                            max_stok: null,
-                            locked: true,
-                            catatan: order.catatan
+                    // Add locked items from online order
+                    if (order.detail && order.detail.length > 0) {
+                        order.detail.forEach(dt => {
+                            this.cart.push({
+                                id: dt.id_item,
+                                tipe: dt.tipe_item ? dt.tipe_item.toLowerCase() : 'layanan',
+                                nama: dt.layanan?.nama_layanan ?? 'Custom Item',
+                                harga: dt.harga_satuan,
+                                satuan: dt.layanan?.satuan ?? 'unit',
+                                qty: dt.qty,
+                                max_stok: null,
+                                locked: true,
+                                catatan: dt.catatan
+                            });
                         });
                     }
                 },

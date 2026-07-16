@@ -7,7 +7,6 @@ use App\Models\Transaksi;
 use App\Models\Pengeluaran;
 use App\Models\User;
 use App\Models\Barang;
-use App\Models\Pesanan;
 use App\Models\Membership;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -80,11 +79,11 @@ class AdminDashboardController extends Controller
 
         // 4. DISTRIBUSI STATUS PESANAN ONLINE
         $pesananPerStatus = [
-            'Menunggu' => Pesanan::where('status', 'Menunggu')->count(),
-            'Diproses' => Pesanan::where('status', 'Diproses')->count(),
-            'Siap Diambil' => Pesanan::where('status', 'Siap Diambil')->count(),
-            'Selesai' => Pesanan::where('status', 'Selesai')->count(),
-            'Dibatalkan' => Pesanan::where('status', 'Dibatalkan')->count(),
+            'Menunggu' => Transaksi::where('tipe_transaksi', 'Online')->where('status', 'Menunggu')->count(),
+            'Diproses' => Transaksi::where('tipe_transaksi', 'Online')->where('status', 'Diproses')->count(),
+            'Siap Diambil' => Transaksi::where('tipe_transaksi', 'Online')->where('status', 'Siap Diambil')->count(),
+            'Selesai' => Transaksi::where('tipe_transaksi', 'Online')->whereIn('status', ['Selesai', 'Berhasil'])->count(),
+            'Dibatalkan' => Transaksi::where('tipe_transaksi', 'Online')->where('status', 'Dibatalkan')->count(),
         ];
         $totalPesanan = array_sum($pesananPerStatus);
 

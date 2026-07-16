@@ -89,12 +89,15 @@
                     <td class="py-3 px-4 text-sm">
                         <p class="font-bold text-gray-800 dark:text-white">{{ $detail->nama_item ?? ($detail->tipe_item === 'Barang' ? optional($detail->barang)->nama_barang : optional($detail->layanan)->nama_layanan) ?? 'Item' }}</p>
                         <p class="text-[10px] text-gray-400 dark:text-gray-500 uppercase">{{ $detail->tipe_item }}</p>
-                        @if(strtolower($detail->tipe_item) === 'layanan' && $transaksi->pesananOnline)
+                        @if(strtolower($detail->tipe_item) === 'layanan' && $detail->opsi && $detail->opsi->count() > 0)
                             <div class="mt-1 text-[10px] text-gray-500 dark:text-gray-400">
-                                @foreach($transaksi->pesananOnline->opsi as $opsi)
+                                @foreach($detail->opsi as $opsi)
                                     <p>- {{ $opsi->kategori }}: {{ $opsi->nama_opsi }}</p>
                                 @endforeach
                             </div>
+                        @endif
+                        @if($detail->catatan)
+                            <p class="mt-1 text-[10px] text-gray-500 dark:text-gray-400 italic">Catatan: {{ $detail->catatan }}</p>
                         @endif
                     </td>
                     <td class="py-3 px-4 text-sm text-center text-gray-600 dark:text-gray-400">{{ $detail->qty }}</td>

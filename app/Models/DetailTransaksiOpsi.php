@@ -5,23 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PesananOpsi extends Model
+class DetailTransaksiOpsi extends Model
 {
     use HasFactory;
 
-    protected $table = 'pesanan_opsi';
+    protected $table = 'detail_transaksi_opsi';
 
     protected $fillable = [
-        'id_pesanan',
+        'id_detail_transaksi',
         'id_opsi_layanan',
         'kategori',
         'nama_opsi',
         'harga',
     ];
 
-    public function pesanan()
+    public function detailTransaksi()
     {
-        return $this->belongsTo(Pesanan::class, 'id_pesanan');
+        return $this->belongsTo(DetailTransaksi::class, 'id_detail_transaksi');
     }
 
     public function opsiLayanan()

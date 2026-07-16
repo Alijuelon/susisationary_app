@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Kasir;
 
 use App\Http\Controllers\Controller;
-use App\Models\Pesanan; // Asumsi Anda memiliki model Pesanan untuk transaksi online
+use App\Models\Transaksi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class PesananMasukController extends Controller
 {
@@ -14,16 +15,19 @@ class PesananMasukController extends Controller
         $search = $request->input('search');
         $filterStatus = $request->input('status');
 
-        // Query dasar dengan relasi ke tabel user (pelanggan) dan layanan
-        $query = Pesanan::with(['pelanggan', 'layanan'])
-                        ->orderByRaw("FIELD(status, 'Menunggu', 'Diproses', 'Siap Diambil', 'Selesai', 'Dibatalkan')") // Urutkan berdasarkan prioritas
-                        ->orderBy('created_at', 'asc'); // Yang duluan masuk, berada di atas
+        // Query dasar dengan relasi ke tabel user (pelanggan) dan detail
+        $query = Transaksi::with(['pelanggan', 'detail.layanan'])
+                        ->where('tipe_transaksi', 'Online')
+                        ->orderByRaw("FIELD(status, 'Menunggu', 'Diproses', 'Siap Diambil', 'Selesai', 'Berhasil', 'Dibatalkan')")
+                        ->orderBy('created_at', 'asc');
 
-        // Pencarian berdasarkan Nama Pelanggan atau ID Pesanan
+        // Pencarian berdasarkan Nama Pelanggan atau Kode Transaksi
         if ($search) {
-            $query->whereHas('pelanggan', function($q) use ($search) {
-                $q->where('nama_lengkap', 'like', "%{$search}%");
-            })->orWhere('id', 'like', "%{$search}%");
+            $query->where(function($q) use ($search) {
+                $q->whereHas('pelanggan', function($q2) use ($search) {
+                    $q2->where('nama_lengkap', 'like', "%{$search}%");
+                })->orWhere('kode_transaksi', 'like', "%{$search}%");
+            });
         }
 
         // Filter berdasarkan Status
@@ -41,26 +45,28 @@ class PesananMasukController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:Menunggu,Diproses,Siap Diambil,Selesai,Dibatalkan',
+            'status' => 'required|in:Menunggu,Diproses,Siap Diambil,Selesai,Berhasil,Dibatalkan',
         ]);
 
-        $pesanan = Pesanan::findOrFail($id);
-        $pesanan->update([
+        $transaksi = Transaksi::where('tipe_transaksi', 'Online')->findOrFail($id);
+        $transaksi->update([
             'status' => $request->status
         ]);
 
-        return redirect()->route('kasir.pesanan.masuk')->with('success', 'Status pesanan #' . $pesanan->id . ' berhasil diperbarui menjadi ' . $request->status . '!');
+        return redirect()->route('kasir.pesanan.masuk')->with('success', 'Status pesanan ' . $transaksi->kode_transaksi . ' berhasil diperbarui menjadi ' . $request->status . '!');
     }
 
     // 3. Menghapus satu pesanan
     public function destroy($id)
     {
-        $pesanan = Pesanan::findOrFail($id);
-        // Hapus file dokumen pendukung jika ada
-        if ($pesanan->file_dokumen && \Storage::disk('public')->exists($pesanan->file_dokumen)) {
-            \Storage::disk('public')->delete($pesanan->file_dokumen);
+        $transaksi = Transaksi::with('detail')->where('tipe_transaksi', 'Online')->findOrFail($id);
+        
+        foreach ($transaksi->detail as $dt) {
+            if ($dt->file_dokumen && Storage::disk('public')->exists($dt->file_dokumen)) {
+                Storage::disk('public')->delete($dt->file_dokumen);
+            }
         }
-        $pesanan->delete();
+        $transaksi->delete();
 
         return redirect()->back()->with('success', 'Pesanan online berhasil dihapus.');
     }
@@ -74,12 +80,14 @@ class PesananMasukController extends Controller
             return redirect()->back()->with('error', 'Belum ada data pesanan yang dipilih untuk dihapus.');
         }
 
-        $pesanans = Pesanan::whereIn('id', $ids)->get();
-        foreach ($pesanans as $pesanan) {
-            if ($pesanan->file_dokumen && \Storage::disk('public')->exists($pesanan->file_dokumen)) {
-                \Storage::disk('public')->delete($pesanan->file_dokumen);
+        $transaksis = Transaksi::with('detail')->where('tipe_transaksi', 'Online')->whereIn('id', $ids)->get();
+        foreach ($transaksis as $transaksi) {
+            foreach ($transaksi->detail as $dt) {
+                if ($dt->file_dokumen && Storage::disk('public')->exists($dt->file_dokumen)) {
+                    Storage::disk('public')->delete($dt->file_dokumen);
+                }
             }
-            $pesanan->delete();
+            $transaksi->delete();
         }
 
         return redirect()->back()->with('success', count($ids) . ' pesanan online berhasil dihapus sekaligus.');

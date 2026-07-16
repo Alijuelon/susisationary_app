@@ -8,22 +8,19 @@ class Transaksi extends Model
 {
     protected $table = 'transaksi';
 
-    // Konfigurasi Primary Key String (TRX-XXXX)
-    public $incrementing = false;
-    protected $keyType = 'string';
-
     protected $fillable = [
         'id',
         'id_kasir',
         'id_pelanggan',
-        'id_pesanan_online',
         'id_membership',
         'nama_pelanggan',
         'total_harga',
         'uang_bayar',
         'kembalian',
         'status',
-        'kode_transaksi'
+        'kode_transaksi',
+        'tipe_transaksi',
+        'metode_pembayaran',
     ];
 
     public function kasir()

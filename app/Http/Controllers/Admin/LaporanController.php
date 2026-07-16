@@ -24,7 +24,7 @@ class LaporanController extends Controller
             ->map(function ($item) {
                 return (object) [
                     'tanggal'    => $item->created_at,
-                    'keterangan' => 'Penjualan Kasir (' . $item->id . ')',
+                    'keterangan' => 'Penjualan ' . $item->tipe_transaksi . ' (' . $item->kode_transaksi . ')',
                     'jenis'      => 'Pemasukan',
                     'nominal'    => $item->total_harga,
                 ];
@@ -61,7 +61,7 @@ class LaporanController extends Controller
         $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
         $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->format('Y-m-d'));
 
-        $pemasukan = Transaksi::where('status', 'Berhasil')->whereDate('created_at', '>=', $startDate)->whereDate('created_at', '<=', $endDate)->get()->map(fn($i) => (object) ['tanggal' => $i->created_at, 'keterangan' => 'Penjualan Kasir ('.$i->id.')', 'jenis' => 'Pemasukan', 'nominal' => $i->total_harga]);
+        $pemasukan = Transaksi::where('status', 'Berhasil')->whereDate('created_at', '>=', $startDate)->whereDate('created_at', '<=', $endDate)->get()->map(fn($i) => (object) ['tanggal' => $i->created_at, 'keterangan' => 'Penjualan ' . $i->tipe_transaksi . ' ('.$i->kode_transaksi.')', 'jenis' => 'Pemasukan', 'nominal' => $i->total_harga]);
         $pengeluaran = Pengeluaran::whereDate('tanggal_pengeluaran', '>=', $startDate)->whereDate('tanggal_pengeluaran', '<=', $endDate)->get()->map(fn($i) => (object) ['tanggal' => Carbon::parse($i->tanggal_pengeluaran), 'keterangan' => $i->keterangan, 'jenis' => 'Pengeluaran', 'nominal' => $i->nominal]);
         
         $laporan = $pemasukan->concat($pengeluaran)->sortBy('tanggal'); // Cetak PDF biasanya dari tanggal terlama ke terbaru

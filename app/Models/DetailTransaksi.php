@@ -9,18 +9,25 @@ class DetailTransaksi extends Model
     protected $table = 'detail_transaksi';
 
     protected $fillable = [
-        'id_transaksi', // <-- INI YANG BIKIN ERROR JIKA TIDAK ADA!
+        'id_transaksi',
         'tipe_item',
         'id_item',
-        'nama_item',    // Tambahkan jika di database Anda ada kolom nama_item
+        'nama_item',
         'harga_satuan',
         'qty',
         'subtotal',
+        'file_dokumen',
+        'catatan',
     ];
 
     public function transaksi()
     {
         return $this->belongsTo(Transaksi::class, 'id_transaksi');
+    }
+
+    public function opsi()
+    {
+        return $this->hasMany(DetailTransaksiOpsi::class, 'id_detail_transaksi');
     }
 
     // Fungsi Pembantu: Mengambil detail barang
