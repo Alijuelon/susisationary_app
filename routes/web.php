@@ -179,8 +179,7 @@ Route::middleware(['auth', 'role:kasir'])->prefix('kasir')->name('kasir.')->grou
     Route::delete('membership/{id}', [MembershipKasirController::class, 'destroy'])->name('membership.destroy');
 
     // Sistem Antrian Online (Kasir)
-    Route::post('/queue/{id}/process', [\App\Http\Controllers\QueueController::class, 'processQueue'])->name('queue.process');
-    Route::post('/queue/{id}/complete', [\App\Http\Controllers\QueueController::class, 'completeQueue'])->name('queue.complete');
+
 });
 
 /*
@@ -207,8 +206,7 @@ Route::middleware(['auth', 'role:pelanggan'])->prefix('pelanggan')->name('pelang
     Route::post('/membership', [PelangganMembershipController::class, 'store'])->name('membership.store');
 
     // Sistem Antrian Online (Pelanggan)
-    Route::post('/queue/take', [\App\Http\Controllers\QueueController::class, 'takeQueue'])->name('queue.take');
-    Route::post('/queue/{id}/cancel', [\App\Http\Controllers\QueueController::class, 'cancelQueue'])->name('queue.cancel');
+
 
 });
 

@@ -30,20 +30,20 @@
                             <div>
                                 <p class="text-sm text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider">Status Antrian</p>
                                 <h3 class="text-2xl font-bold text-gray-800 dark:text-white flex items-center">
-                                    {{ $antrianAktif->status->label() }}
-                                    @if($antrianAktif->status === \App\Enums\QueueStatus::MENUNGGU)
+                                    {{ $antrianAktif->status }}
+                                    @if($antrianAktif->status === 'Menunggu')
                                         <span class="ml-3 flex h-3 w-3 relative">
                                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
                                             <span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500"></span>
                                         </span>
-                                    @elseif($antrianAktif->status === \App\Enums\QueueStatus::DIPROSES)
+                                    @elseif($antrianAktif->status === 'Diproses')
                                         <span class="ml-3 flex h-3 w-3 relative">
                                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                                             <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
                                         </span>
                                     @endif
                                 </h3>
-                                @if($antrianAktif->status === \App\Enums\QueueStatus::MENUNGGU)
+                                @if($antrianAktif->status === 'Menunggu')
                                     <p class="text-sm text-indigo-600 dark:text-indigo-400 font-medium mt-1">
                                         <i class="fa-solid fa-stopwatch mr-1"></i> Estimasi Tunggu: {{ $antrianAktif->estimated_wait_time }} Menit
                                     </p>
@@ -54,9 +54,10 @@
                             <button type="button" @click="showGuideModal = true" class="px-4 py-3 bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 font-bold rounded-xl transition-colors border border-gray-200 dark:border-slate-700" title="Panduan Antrian">
                                 <i class="fa-solid fa-circle-question"></i>
                             </button>
-                            @if($antrianAktif->status === \App\Enums\QueueStatus::MENUNGGU)
-                                <form action="{{ route('pelanggan.queue.cancel', $antrianAktif->id) }}" method="POST" class="w-full md:w-auto" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan antrian ini?');">
+                            @if($antrianAktif->status === 'Menunggu')
+                                <form action="{{ route('pelanggan.pesanan.destroy', $antrianAktif->id) }}" method="POST" class="w-full md:w-auto" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pesanan (dan antrian) ini?');">
                                     @csrf
+                                    @method('DELETE')
                                     <button type="submit" class="w-full md:w-auto px-6 py-3 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 font-bold rounded-xl transition-colors border border-red-200 dark:border-red-800/50 flex items-center justify-center">
                                         <i class="fa-solid fa-xmark mr-2"></i> Batalkan Antrian
                                     </button>
@@ -73,30 +74,13 @@
                     </div>
                 </div>
             @else
-                <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 p-6 flex flex-col md:flex-row items-center justify-between relative overflow-hidden transition-colors group hover:border-indigo-300 dark:hover:border-indigo-700">
-                    <div class="absolute -right-10 -top-10 w-40 h-40 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
-                    
-                    <div class="z-10 flex items-center mb-4 md:mb-0">
-                        <div class="w-12 h-12 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-xl flex items-center justify-center text-xl mr-4 shadow-sm">
-                            <i class="fa-solid fa-ticket"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-bold text-gray-800 dark:text-white">Ambil Antrian Toko</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Pesan antrian secara online sebelum Anda tiba di toko.</p>
-                        </div>
+            @else
+                <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 p-6 flex flex-col items-center justify-center relative overflow-hidden transition-colors group">
+                    <div class="w-16 h-16 bg-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-3">
+                        <i class="fa-solid fa-mug-hot text-2xl text-gray-400 dark:text-gray-500"></i>
                     </div>
-                    
-                    <div class="z-10 flex space-x-3 w-full md:w-auto mt-4 md:mt-0">
-                        <button type="button" @click="showGuideModal = true" class="px-4 py-3 bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors border border-transparent" title="Panduan Antrian">
-                            <i class="fa-solid fa-circle-question"></i>
-                        </button>
-                        <form action="{{ route('pelanggan.queue.take') }}" method="POST" class="w-full md:w-auto">
-                            @csrf
-                            <button type="submit" class="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 dark:shadow-indigo-900/20 transition-all transform hover:-translate-y-0.5 flex items-center justify-center">
-                                <i class="fa-solid fa-hand-pointer mr-2"></i> Ambil Sekarang
-                            </button>
-                        </form>
-                    </div>
+                    <p class="font-medium text-gray-600 dark:text-gray-300">Antrian Kosong</p>
+                    <p class="text-sm text-gray-500 mt-1">Anda tidak memiliki pesanan online yang sedang menunggu/diproses.</p>
                 </div>
             @endif
 
@@ -112,7 +96,7 @@
                         
                         <div class="px-6 py-5 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center">
                             <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center">
-                                <i class="fa-solid fa-circle-info text-indigo-500 mr-2"></i> Panduan Antrian Online
+                                <i class="fa-solid fa-circle-info text-indigo-500 mr-2"></i> Panduan Antrian
                             </h3>
                             <button type="button" @click="showGuideModal = false" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors">
                                 <i class="fa-solid fa-times text-xl"></i>
@@ -122,19 +106,15 @@
                         <div class="px-6 py-6 text-sm text-gray-600 dark:text-gray-300 space-y-4">
                             <div class="flex">
                                 <div class="flex-shrink-0 mt-1"><i class="fa-solid fa-1 text-indigo-500 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-900/30 w-7 h-7 rounded-full flex items-center justify-center"></i></div>
-                                <div class="ml-3"><p><strong class="text-gray-800 dark:text-white">Ambil Antrian</strong><br>Klik tombol "Ambil Sekarang" untuk mendapatkan nomor antrian Anda secara online. Anda tidak perlu repot-repot datang ke toko hanya untuk mengambil nomor antrean.</p></div>
+                                <div class="ml-3"><p><strong class="text-gray-800 dark:text-white">Sistem Otomatis</strong><br>Sistem antrian terintegrasi langsung dengan pesanan cetak online Anda. Jika Anda membuat pesanan, maka otomatis Anda akan masuk dalam antrian kasir.</p></div>
                             </div>
                             <div class="flex">
                                 <div class="flex-shrink-0 mt-1"><i class="fa-solid fa-2 text-indigo-500 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-900/30 w-7 h-7 rounded-full flex items-center justify-center"></i></div>
-                                <div class="ml-3"><p><strong class="text-gray-800 dark:text-white">Pantau Status</strong><br>Setelah mendaftar, Anda dapat memantau status antrian (Menunggu / Diproses) dan estimasi waktu tunggu secara langsung (Live) dari dashboard ini.</p></div>
+                                <div class="ml-3"><p><strong class="text-gray-800 dark:text-white">Estimasi Tunggu</strong><br>Estimasi dihitung dari antrean di depan Anda.</p></div>
                             </div>
                             <div class="flex">
                                 <div class="flex-shrink-0 mt-1"><i class="fa-solid fa-3 text-indigo-500 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-900/30 w-7 h-7 rounded-full flex items-center justify-center"></i></div>
-                                <div class="ml-3"><p><strong class="text-gray-800 dark:text-white">Datang ke Toko</strong><br>Silakan datang ke toko ketika status antrian Anda sudah dekat atau berubah menjadi "Diproses". Pastikan Anda ada di lokasi saat dipanggil oleh kasir.</p></div>
-                            </div>
-                            <div class="flex">
-                                <div class="flex-shrink-0 mt-1"><i class="fa-solid fa-4 text-indigo-500 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-900/30 w-7 h-7 rounded-full flex items-center justify-center"></i></div>
-                                <div class="ml-3"><p><strong class="text-gray-800 dark:text-white">Pembatalan</strong><br>Anda dapat membatalkan nomor antrian kapan saja, selama statusnya masih "Menunggu".</p></div>
+                                <div class="ml-3"><p><strong class="text-gray-800 dark:text-white">Status Antrian</strong><br>Tunggu hingga kasir memproses pesanan dan antrian Anda akan maju dengan sendirinya.</p></div>
                             </div>
                         </div>
                         

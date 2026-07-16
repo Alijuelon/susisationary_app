@@ -32,12 +32,6 @@ class KasirDashboardController extends Controller
             ->take(5)
             ->get();
 
-        // 4. Daftar Antrian Aktif Hari Ini (Queue System)
-        $daftarAntrian = \App\Models\Queue::whereDate('created_at', $hariIni)
-            ->whereIn('status', [\App\Enums\QueueStatus::MENUNGGU, \App\Enums\QueueStatus::DIPROSES])
-            ->orderBy('created_at', 'asc')
-            ->get();
-
         // 5. Daftar Pesanan Online (Antrian Cetak)
         $antrianPesananOnline = Transaksi::with(['pelanggan', 'detail.layanan'])
             ->where('tipe_transaksi', 'Online')
@@ -49,7 +43,6 @@ class KasirDashboardController extends Controller
             'pendapatanHariIni', 
             'totalTransaksi', 
             'transaksiTerbaru',
-            'daftarAntrian',
             'antrianPesananOnline'
         ));
     }
