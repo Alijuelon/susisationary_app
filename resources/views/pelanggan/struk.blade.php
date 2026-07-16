@@ -74,32 +74,38 @@
             <thead>
                 <tr class="bg-gray-50 dark:bg-slate-700/50 transition-colors">
                     <th class="py-3 px-4 font-bold text-gray-700 dark:text-gray-300 text-sm border-y border-gray-200 dark:border-slate-600 transition-colors">Deskripsi Layanan</th>
-                    <th class="py-3 px-4 font-bold text-gray-700 dark:text-gray-300 text-sm border-y border-gray-200 dark:border-slate-600 text-center transition-colors">Estimasi Tarif Dasar</th>
+                    <th class="py-3 px-4 font-bold text-gray-700 dark:text-gray-300 text-sm border-y border-gray-200 dark:border-slate-600 text-center transition-colors">Qty</th>
+                    <th class="py-3 px-4 font-bold text-gray-700 dark:text-gray-300 text-sm border-y border-gray-200 dark:border-slate-600 text-right transition-colors">Harga/Satuan</th>
+                    <th class="py-3 px-4 font-bold text-gray-700 dark:text-gray-300 text-sm border-y border-gray-200 dark:border-slate-600 text-right transition-colors">Subtotal</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     <td class="py-4 px-4 border-b border-gray-100 dark:border-slate-700 transition-colors">
                         <p class="font-bold text-gray-800 dark:text-white transition-colors">{{ $pesanan->layanan->nama_layanan ?? 'Layanan Custom' }}</p>
+                        @if($pesanan->opsi && $pesanan->opsi->count() > 0)
+                            <div class="mt-1 text-[10px] text-gray-500 dark:text-gray-400">
+                                @foreach($pesanan->opsi as $opsi)
+                                    <p>- {{ $opsi->kategori }}: {{ $opsi->nama_opsi }}</p>
+                                @endforeach
+                            </div>
+                        @endif
                         @if($pesanan->catatan)
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 italic transition-colors">Catatan: "{{ $pesanan->catatan }}"</p>
+                        <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1 italic transition-colors">Catatan: "{{ $pesanan->catatan }}"</p>
                         @endif
                     </td>
                     <td class="py-4 px-4 border-b border-gray-100 dark:border-slate-700 text-center text-gray-800 dark:text-white transition-colors">
-                        @if($pesanan->layanan)
-                        Rp {{ number_format($pesanan->layanan->harga_satuan, 0, ',', '.') }} <span class="text-xs text-gray-500 dark:text-gray-400 transition-colors">/ {{ $pesanan->layanan->satuan }}</span>
-                        @else
-                        -
-                        @endif
+                        {{ $pesanan->qty ?? 1 }}
+                    </td>
+                    <td class="py-4 px-4 border-b border-gray-100 dark:border-slate-700 text-right text-gray-800 dark:text-white transition-colors">
+                        Rp {{ number_format(($pesanan->total_harga ?? 0) / ($pesanan->qty ?? 1), 0, ',', '.') }}
+                    </td>
+                    <td class="py-4 px-4 border-b border-gray-100 dark:border-slate-700 text-right font-bold text-gray-800 dark:text-white transition-colors">
+                        Rp {{ number_format($pesanan->total_harga ?? 0, 0, ',', '.') }}
                     </td>
                 </tr>
             </tbody>
         </table>
-
-        <div class="bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 p-4 rounded-xl text-sm mb-8 border border-blue-100 dark:border-blue-800/50 transition-colors">
-            <p class="font-bold flex items-center mb-1"><i class="fa-solid fa-circle-info mr-2"></i> Informasi Penting:</p>
-            <p>Harga di atas adalah estimasi tarif dasar per satuan. Total biaya akhir akan dihitung oleh kasir kami berdasarkan jumlah halaman/kuantitas aktual dari dokumen yang Anda unggah saat pengambilan di toko.</p>
-        </div>
 
         <div class="text-center pt-8 border-t border-gray-100 dark:border-slate-700 text-sm text-gray-500 dark:text-gray-400 transition-colors">
             <p class="font-bold text-gray-800 dark:text-white mb-1 transition-colors">Terima kasih atas pesanan Anda!</p>

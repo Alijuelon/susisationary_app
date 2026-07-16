@@ -95,6 +95,7 @@
                             <th class="px-6 py-4 font-semibold">ID Pesanan</th>
                             <th class="px-6 py-4 font-semibold">Layanan</th>
                             <th class="px-6 py-4 font-semibold">Catatan</th>
+                            <th class="px-6 py-4 font-semibold text-right">Total</th>
                             <th class="px-6 py-4 font-semibold text-center">Status</th>
                             <th class="px-6 py-4 font-semibold text-right">Aksi</th>
                         </tr>
@@ -113,6 +114,9 @@
                                 </td>
                                 <td class="px-6 py-4 font-medium text-gray-800 dark:text-white">{{ $item->layanan->nama_item ?? 'Custom' }}</td>
                                 <td class="px-6 py-4 text-xs text-gray-500 dark:text-gray-400">{{ Str::limit($item->catatan, 40) ?: '-' }}</td>
+                                <td class="px-6 py-4 text-right font-bold text-gray-800 dark:text-white">
+                                    Rp {{ number_format($item->total_harga ?? 0, 0, ',', '.') }}
+                                </td>
                                 <td class="px-6 py-4 text-center">
                                     @if($item->status === 'Menunggu') <span class="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-colors">Menunggu</span>
                                     @elseif($item->status === 'Diproses') <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-colors">Diproses</span>
@@ -149,7 +153,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="7" class="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
                                     <div class="flex flex-col items-center justify-center">
                                         <i class="fa-solid fa-box-open text-4xl mb-3 text-gray-300 dark:text-slate-600"></i>
                                         @if(request('search') || request('status') || request('tgl_mulai') || request('tgl_akhir'))

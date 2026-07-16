@@ -25,7 +25,6 @@ class DatabaseSeeder extends Seeder
             'no_telp' => '081234567890',
             'pesan_penutup' => 'Terima Kasih',
             'membership_aktif' => true,
-            'diskon_member' => 10,
             'antrian_aktif' => true,
             'waktu_proses_antrian' => 5,
         ]);

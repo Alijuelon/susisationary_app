@@ -28,18 +28,6 @@
                     </label>
                 </div>
 
-                {{-- Persentase Diskon --}}
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2">Persentase Diskon Member (%)</label>
-                    <div class="relative">
-                        <input type="number" name="diskon_member" value="{{ $pengaturan->diskon_member ?? 0 }}" min="0" max="100" step="0.01"
-                            class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-gray-300 rounded-xl p-3 pr-12 text-lg font-bold focus:ring-blue-500 focus:border-blue-500 transition-colors">
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-4">
-                            <span class="text-gray-400 dark:text-gray-500 font-bold text-lg">%</span>
-                        </div>
-                    </div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2"><i class="fa-solid fa-info-circle mr-1"></i>Diskon ini berlaku untuk semua transaksi pelanggan dengan status membership aktif. Nilai 0 berarti tidak ada diskon.</p>
-                </div>
 
                 <div class="pt-4 border-t border-gray-100 dark:border-slate-800">
                     <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 shadow-md transition-all text-sm">

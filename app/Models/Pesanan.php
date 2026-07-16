@@ -16,6 +16,8 @@ class Pesanan extends Model
         'id_pelanggan',
         'id_layanan',
         'file_dokumen',
+        'qty',
+        'total_harga',
         'catatan',
         'status',
     ];
@@ -34,5 +36,13 @@ class Pesanan extends Model
     public function layanan()
     {
         return $this->belongsTo(Layanan::class, 'id_layanan');
+    }
+
+    /**
+     * Relasi ke model PesananOpsi
+     */
+    public function opsi()
+    {
+        return $this->hasMany(PesananOpsi::class, 'id_pesanan');
     }
 }

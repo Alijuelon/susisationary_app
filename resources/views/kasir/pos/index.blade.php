@@ -138,6 +138,7 @@
                                         <span x-show="item.locked" class="text-[8px] bg-indigo-500 text-white font-bold px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap"><i class="fa-solid fa-cloud-arrow-down mr-1"></i>ONLINE</span>
                                     </div>
                                     <p class="text-[11px] text-gray-500 dark:text-gray-400 font-medium" x-text="formatRupiah(item.harga) + (item.tipe === 'layanan' ? ' / ' + item.satuan : '')"></p>
+                                    <p x-show="item.catatan" class="text-[10px] text-gray-400 dark:text-gray-500 italic mt-1" x-text="'Specs: ' + item.catatan"></p>
                                 </div>
                                 <button x-show="!item.locked" @click="removeFromCart(index)" class="text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 p-1 w-6 h-6 flex items-center justify-center shrink-0 transition-colors bg-gray-50 dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-900/20 rounded">
                                     <i class="fa-solid fa-xmark"></i>
@@ -189,7 +190,6 @@
                              <div class="overflow-hidden">
                                  <p class="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 truncate" x-text="memberInfo?.pelanggan?.nama_lengkap ?? ''"></p>
                              </div>
-                             <span class="text-[10px] font-black text-white bg-emerald-500 px-1.5 py-0.5 rounded shadow-sm shrink-0 ml-1">-<span x-text="pengaturan?.diskon_member ?? 0"></span>%</span>
                         </div>
                         <p x-show="memberError" class="text-[9px] text-red-500 font-bold mt-1 truncate" x-text="memberError"></p>
                     </div>
@@ -200,10 +200,6 @@
                     <div class="flex justify-between items-center">
                         <p class="text-gray-500 dark:text-gray-400 text-xs font-medium">Subtotal</p>
                         <span class="text-sm font-bold text-gray-700 dark:text-gray-300" x-text="formatRupiah(cartTotal)"></span>
-                    </div>
-                    <div x-show="memberInfo" class="flex justify-between items-center">
-                        <p class="text-emerald-600 dark:text-emerald-400 text-xs font-bold">Diskon Member</p>
-                        <span class="text-sm font-bold text-emerald-600 dark:text-emerald-400" x-text="'-' + formatRupiah(discountAmount)"></span>
                     </div>
                     <div class="flex justify-between items-center pt-2 border-t border-dashed border-gray-200 dark:border-slate-700 mt-2">
                         <p class="text-gray-800 dark:text-gray-200 text-sm font-black uppercase tracking-wider">Total Tagihan</p>
@@ -301,15 +297,19 @@
 
                     // Add locked item from online order
                     if (order.layanan) {
+                        let qty = order.qty && order.qty > 0 ? order.qty : 1;
+                        let hargaSatuan = order.total_harga ? (order.total_harga / qty) : order.layanan.harga_satuan;
+                        
                         this.cart.push({
                             id: order.layanan.id,
                             tipe: 'layanan',
                             nama: order.layanan.nama_layanan,
-                            harga: order.layanan.harga_satuan,
+                            harga: hargaSatuan,
                             satuan: order.layanan.satuan ?? 'unit',
-                            qty: 1,
+                            qty: qty,
                             max_stok: null,
-                            locked: true
+                            locked: true,
+                            catatan: order.catatan
                         });
                     }
                 },
@@ -403,13 +403,8 @@
                     return this.cart.reduce((total, item) => total + (item.harga * item.qty), 0);
                 },
 
-                get discountAmount() {
-                    if (!this.memberInfo || !this.pengaturan?.membership_aktif) return 0;
-                    return Math.round(this.cartTotal * (this.pengaturan.diskon_member / 100));
-                },
-
                 get grandTotal() {
-                    return this.cartTotal - this.discountAmount;
+                    return this.cartTotal;
                 },
 
                 get kembalian() {

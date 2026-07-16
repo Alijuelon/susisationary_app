@@ -55,11 +55,11 @@
             </form>
         </div>
 
-        {{-- Info Diskon Aktif --}}
+        {{-- Info Membership Aktif --}}
         @if($pengaturan && $pengaturan->membership_aktif)
             <div class="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400 px-5 py-3 rounded-xl mb-6 flex items-center text-sm transition-colors">
-                <i class="fa-solid fa-badge-percent mr-3 text-lg"></i>
-                <span>Program membership <strong>AKTIF</strong> dengan diskon <strong>{{ $pengaturan->diskon_member }}%</strong> untuk setiap transaksi member.</span>
+                <i class="fa-solid fa-users mr-3 text-lg"></i>
+                <span>Program membership <strong>AKTIF</strong>.</span>
             </div>
         @else
             <div class="bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-500 dark:text-gray-400 px-5 py-3 rounded-xl mb-6 flex items-center text-sm transition-colors">

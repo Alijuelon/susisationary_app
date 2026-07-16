@@ -15,14 +15,12 @@ class Pengaturan extends Model
         'no_telp',
         'pesan_penutup',
         'membership_aktif',
-        'diskon_member',
         'antrian_aktif',
         'waktu_proses_antrian',
     ];
 
     protected $casts = [
         'membership_aktif' => 'boolean',
-        'diskon_member' => 'decimal:2',
         'antrian_aktif' => 'boolean',
         'waktu_proses_antrian' => 'integer',
     ];

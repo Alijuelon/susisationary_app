@@ -18,8 +18,6 @@ class Transaksi extends Model
         'id_pelanggan',
         'id_pesanan_online',
         'id_membership',
-        'diskon_persen',
-        'total_sebelum_diskon',
         'nama_pelanggan',
         'total_harga',
         'uang_bayar',

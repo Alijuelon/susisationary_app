@@ -89,6 +89,13 @@
                     <td class="py-3 px-4 text-sm">
                         <p class="font-bold text-gray-800 dark:text-white">{{ $detail->nama_item ?? ($detail->tipe_item === 'Barang' ? optional($detail->barang)->nama_barang : optional($detail->layanan)->nama_layanan) ?? 'Item' }}</p>
                         <p class="text-[10px] text-gray-400 dark:text-gray-500 uppercase">{{ $detail->tipe_item }}</p>
+                        @if(strtolower($detail->tipe_item) === 'layanan' && $transaksi->pesananOnline)
+                            <div class="mt-1 text-[10px] text-gray-500 dark:text-gray-400">
+                                @foreach($transaksi->pesananOnline->opsi as $opsi)
+                                    <p>- {{ $opsi->kategori }}: {{ $opsi->nama_opsi }}</p>
+                                @endforeach
+                            </div>
+                        @endif
                     </td>
                     <td class="py-3 px-4 text-sm text-center text-gray-600 dark:text-gray-400">{{ $detail->qty }}</td>
                     <td class="py-3 px-4 text-sm text-right text-gray-600 dark:text-gray-400">Rp {{ number_format($detail->harga_satuan, 0, ',', '.') }}</td>
@@ -100,16 +107,6 @@
 
         {{-- Summary --}}
         <div class="border-t-2 border-gray-200 dark:border-slate-600 pt-4 space-y-2">
-            @if($transaksi->total_sebelum_diskon)
-                <div class="flex justify-between text-sm">
-                    <span class="text-gray-500 dark:text-gray-400">Subtotal</span>
-                    <span class="text-gray-700 dark:text-gray-300 font-medium">Rp {{ number_format($transaksi->total_sebelum_diskon, 0, ',', '.') }}</span>
-                </div>
-                <div class="flex justify-between text-sm">
-                    <span class="text-emerald-600 dark:text-emerald-400">Diskon Member ({{ $transaksi->diskon_persen }}%)</span>
-                    <span class="text-emerald-600 dark:text-emerald-400 font-bold">- Rp {{ number_format($transaksi->total_sebelum_diskon - $transaksi->total_harga, 0, ',', '.') }}</span>
-                </div>
-            @endif
             <div class="flex justify-between text-lg font-bold pt-2 border-t border-dashed border-gray-300 dark:border-slate-600">
                 <span class="text-gray-900 dark:text-white">TOTAL</span>
                 <span class="text-gray-900 dark:text-white">Rp {{ number_format($transaksi->total_harga, 0, ',', '.') }}</span>
@@ -122,11 +119,6 @@
                 <span class="text-gray-500 dark:text-gray-400">Kembalian</span>
                 <span class="text-green-600 dark:text-green-400 font-bold">Rp {{ number_format($transaksi->kembalian, 0, ',', '.') }}</span>
             </div>
-            @if($transaksi->total_sebelum_diskon && $transaksi->diskon_persen > 0)
-                <div class="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400 px-4 py-3 rounded-xl text-xs mt-4 transition-colors">
-                    <p class="font-bold"><i class="fa-solid fa-piggy-bank mr-1"></i> Anda Hemat Rp {{ number_format($transaksi->total_sebelum_diskon - $transaksi->total_harga, 0, ',', '.') }} dengan membership!</p>
-                </div>
-            @endif
         </div>
 
         {{-- Footer --}}

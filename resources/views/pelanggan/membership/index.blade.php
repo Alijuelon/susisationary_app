@@ -7,7 +7,7 @@
             this.showConfirmModal = true;
         }
     }">
-        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 transition-colors">Status keanggotaan Anda di Susi Stationary. Dapatkan diskon spesial di setiap transaksi!</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 transition-colors">Status keanggotaan Anda di Susi Stationary.</p>
 
         @if($membership)
             {{-- Status Card --}}
@@ -71,7 +71,7 @@
                     @elseif($membership->status === 'aktif' && $pengaturan && $pengaturan->membership_aktif)
                         <div class="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400 px-5 py-4 rounded-xl text-sm transition-colors">
                             <p class="font-bold mb-1"><i class="fa-solid fa-party-horn mr-2"></i>Selamat! Anda Member Aktif</p>
-                            <p class="text-xs">Anda mendapatkan diskon <strong>{{ $pengaturan->diskon_member }}%</strong> untuk setiap transaksi. Cukup sebutkan nama atau nomor kartu Anda saat bertransaksi di kasir.</p>
+                            <p class="text-xs">Anda adalah member aktif Susi Stationary. Cukup sebutkan nama atau nomor kartu Anda saat bertransaksi di kasir.</p>
                         </div>
                     @elseif($membership->status === 'nonaktif')
                         <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 text-red-700 dark:text-red-400 px-5 py-4 rounded-xl text-sm transition-colors">
@@ -88,12 +88,12 @@
                     <i class="fa-solid fa-id-card text-3xl text-gray-400 dark:text-gray-500"></i>
                 </div>
                 <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">Belum Menjadi Member</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">Daftar sebagai member Susi Stationary dan dapatkan diskon spesial di setiap transaksi Anda!</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">Daftar sebagai member Susi Stationary untuk kemudahan dalam bertransaksi Anda!</p>
 
                 @if($pengaturan && $pengaturan->membership_aktif)
                     <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 text-blue-700 dark:text-blue-400 px-5 py-4 rounded-xl text-sm mb-6 max-w-md mx-auto text-left transition-colors">
                         <p class="font-bold mb-1"><i class="fa-solid fa-gift mr-2"></i>Keuntungan Member:</p>
-                        <p class="text-xs">Diskon <strong>{{ $pengaturan->diskon_member }}%</strong> untuk setiap transaksi di Susi Stationary.</p>
+                        <p class="text-xs">Catat seluruh riwayat transaksi Anda dengan mudah di Susi Stationary.</p>
                     </div>
 
                     <button type="button" @click="openConfirmModal()" class="bg-blue-600 text-white px-8 py-3.5 rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 dark:shadow-blue-900/20 transition-all text-sm hover:-translate-y-0.5">
@@ -122,7 +122,7 @@
                             <i class="fa-solid fa-user-plus text-2xl text-blue-500 dark:text-blue-400"></i>
                         </div>
                         <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Konfirmasi Pendaftaran</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Daftarkan diri Anda sebagai member sekarang untuk mulai mendapatkan keuntungan diskon khusus?</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Daftarkan diri Anda sebagai member sekarang?</p>
                     </div>
 
                     <div class="px-6 py-4 bg-gray-50 dark:bg-slate-800/80 flex justify-center space-x-3 rounded-b-2xl border-t border-gray-100 dark:border-slate-800 transition-colors">

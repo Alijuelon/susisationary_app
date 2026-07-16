@@ -120,13 +120,11 @@ class MembershipController extends Controller
     {
         $request->validate([
             'membership_aktif' => 'required|boolean',
-            'diskon_member' => 'required|numeric|min:0|max:100',
         ]);
 
         $pengaturan = Pengaturan::first();
         $pengaturan->update([
             'membership_aktif' => $request->membership_aktif,
-            'diskon_member' => $request->diskon_member,
         ]);
 
         return redirect()->route('admin.membership.settings')

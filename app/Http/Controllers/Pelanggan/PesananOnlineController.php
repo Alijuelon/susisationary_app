@@ -13,7 +13,7 @@ class PesananOnlineController extends Controller
     // Menampilkan form pemesanan
     public function create()
     {
-        $layanan = Layanan::all();
+        $layanan = Layanan::with('opsiLayanan')->get();
         return view('pelanggan.pesanan.create', compact('layanan'));
     }
 
@@ -22,32 +22,53 @@ class PesananOnlineController extends Controller
     {
         $request->validate([
             'id_layanan'       => 'required|exists:layanans,id',
-            'file_dokumen'     => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120', // Maks 5MB
+            'file_dokumen'     => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',
             'jumlah_rangkap'   => 'required|integer|min:1',
-            'warna_cetak'      => 'required|string',
-            'sisi_cetak'       => 'required|string',
             'catatan_tambahan' => 'nullable|string|max:500',
+            'opsi'             => 'nullable|array',
+            'opsi.*'           => 'exists:opsi_layanans,id',
         ], [
             'file_dokumen.mimes' => 'Format file harus PDF, Word, atau Gambar.',
             'file_dokumen.max'   => 'Ukuran file maksimal adalah 5MB.',
         ]);
 
-        // Menyimpan file ke dalam folder storage/app/public/dokumen_pesanan
         $filePath = $request->file('file_dokumen')->store('dokumen_pesanan', 'public');
+        
+        $layanan = Layanan::findOrFail($request->id_layanan);
+        $totalHarga = $layanan->harga_satuan;
+        
+        $opsiDibeli = [];
+        if ($request->opsi) {
+            $opsiList = \App\Models\OpsiLayanan::whereIn('id', $request->opsi)->get();
+            foreach ($opsiList as $o) {
+                $totalHarga += $o->harga;
+                $opsiDibeli[] = $o;
+            }
+        }
+        
+        $totalHarga = $totalHarga * $request->jumlah_rangkap;
 
-        // Gabungkan spesifikasi cetak ke dalam catatan
-        $spek = "Rangkap: {$request->jumlah_rangkap} | Warna: {$request->warna_cetak} | Sisi: {$request->sisi_cetak}";
-        $catatanFinal = $request->catatan_tambahan ? $spek . "\nCatatan Tambahan:\n" . $request->catatan_tambahan : $spek;
-
-        Pesanan::create([
+        $pesanan = Pesanan::create([
             'id_pelanggan' => Auth::id(),
             'id_layanan'   => $request->id_layanan,
             'file_dokumen' => $filePath,
-            'catatan'      => $catatanFinal,
+            'qty'          => $request->jumlah_rangkap,
+            'total_harga'  => $totalHarga,
+            'catatan'      => $request->catatan_tambahan,
             'status'       => 'Menunggu',
         ]);
+        
+        foreach ($opsiDibeli as $o) {
+            \App\Models\PesananOpsi::create([
+                'id_pesanan' => $pesanan->id,
+                'id_opsi_layanan' => $o->id,
+                'kategori' => $o->kategori,
+                'nama_opsi' => $o->nama_opsi,
+                'harga' => $o->harga,
+            ]);
+        }
 
-        return redirect()->route('pelanggan.riwayat')->with('success', 'Pesanan berhasil dikirim! Silakan pantau statusnya di sini.');
+        return redirect()->route('pelanggan.riwayat')->with('success', 'Pesanan berhasil dikirim! Total Rp ' . number_format($totalHarga, 0, ',', '.') . '. Silakan pantau statusnya di sini.');
     }
 
     // Menampilkan riwayat pesanan
@@ -118,7 +139,7 @@ class PesananOnlineController extends Controller
     // Menampilkan & Mencetak Struk Pesanan Online (BARU)
     public function downloadStruk($id)
     {
-        $pesanan = Pesanan::with(['layanan', 'pelanggan'])
+        $pesanan = Pesanan::with(['layanan', 'pelanggan', 'opsi'])
             ->where('id_pelanggan', Auth::id()) // Proteksi: Hanya bisa buka struk miliknya sendiri
             ->findOrFail($id);
 

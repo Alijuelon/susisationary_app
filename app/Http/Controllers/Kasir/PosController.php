@@ -52,25 +52,17 @@ class PosController extends Controller
         }
 
         $totalBayarAwal = (float) $request->total_bayar;
-        $diskonPersen = 0;
-        $totalSebelumDiskon = null;
         $idMembership = null;
         $totalAkhir = $totalBayarAwal;
 
-        // Cek membership discount
+        // Cek membership
         if ($request->filled('id_membership')) {
             $membership = Membership::where('id', $request->id_membership)
                 ->where('status', 'aktif')
                 ->first();
 
             if ($membership) {
-                $pengaturan = Pengaturan::first();
-                if ($pengaturan && $pengaturan->membership_aktif && $pengaturan->diskon_member > 0) {
-                    $diskonPersen = (float) $pengaturan->diskon_member;
-                    $totalSebelumDiskon = $totalBayarAwal;
-                    $totalAkhir = round($totalBayarAwal * (1 - $diskonPersen / 100), 0);
-                    $idMembership = $membership->id;
-                }
+                $idMembership = $membership->id;
             }
         }
 
@@ -85,15 +77,22 @@ class PosController extends Controller
             // 1. Buat Kode Transaksi Unik Otomatis
             $kodeUnik = 'TRX-'.date('Ymd').'-'.strtoupper(Str::random(5));
 
+            $idPelanggan = null;
+            if ($request->filled('id_pesanan_online')) {
+                $idPelanggan = Pesanan::find($request->id_pesanan_online)?->id_pelanggan;
+            } elseif (isset($membership) && $membership) {
+                $idPelanggan = $membership->id_pelanggan;
+            }
+
             // 2. Simpan ke tabel transaksi
             $transaksi = Transaksi::create([
                 'kode_transaksi' => $kodeUnik,
                 'id_kasir' => Auth::id(),
-                'id_pelanggan' => $request->filled('id_pesanan_online') ? Pesanan::find($request->id_pesanan_online)?->id_pelanggan : null,
+                'id_pelanggan' => $idPelanggan,
                 'id_pesanan_online' => $request->id_pesanan_online,
                 'id_membership' => $idMembership,
-                'diskon_persen' => $diskonPersen,
-                'total_sebelum_diskon' => $totalSebelumDiskon,
+                'diskon_persen' => 0,
+                'total_sebelum_diskon' => null,
                 'nama_pelanggan' => $request->nama_pelanggan,
                 'total_harga' => $totalAkhir,
                 'uang_bayar' => $request->uang_masuk,
@@ -153,7 +152,7 @@ class PosController extends Controller
     // 3. Cetak Struk Transaksi
     public function cetakStruk($id)
     {
-        $transaksi = Transaksi::with(['detail', 'kasir', 'pelanggan', 'membership.pelanggan'])
+        $transaksi = Transaksi::with(['detail', 'kasir', 'pelanggan', 'membership.pelanggan', 'pesananOnline.opsi'])
             ->findOrFail($id);
 
         $toko = Pengaturan::first();
