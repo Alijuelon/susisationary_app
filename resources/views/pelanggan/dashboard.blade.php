@@ -74,7 +74,6 @@
                     </div>
                 </div>
             @else
-            @else
                 <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 p-6 flex flex-col items-center justify-center relative overflow-hidden transition-colors group">
                     <div class="w-16 h-16 bg-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-3">
                         <i class="fa-solid fa-mug-hot text-2xl text-gray-400 dark:text-gray-500"></i>
