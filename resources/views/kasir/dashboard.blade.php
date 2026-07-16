@@ -177,6 +177,107 @@
             </div>
         </div>
 
+        <!-- Antrian Pesanan Online -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden transition-colors mb-6">
+            <div class="px-6 py-5 border-b border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between sm:items-center transition-colors bg-gradient-to-r from-blue-50 to-white dark:from-slate-800 dark:to-slate-900">
+                <div class="flex items-center mb-4 sm:mb-0">
+                    <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center mr-3 shadow-sm relative shrink-0">
+                        <i class="fa-solid fa-cloud-arrow-down"></i>
+                        @if(count($antrianPesananOnline) > 0)
+                        <span class="absolute top-0 right-0 w-3 h-3 bg-red-500 border-2 border-white dark:border-slate-900 rounded-full animate-pulse"></span>
+                        @endif
+                    </div>
+                    <div>
+                        <h6 class="font-bold text-gray-800 dark:text-white text-base">Antrian Pesanan Online</h6>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Daftar pesanan dari pelanggan online yang masuk.</p>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-3 w-full sm:w-auto">
+                    <a href="{{ route('kasir.pesanan.masuk') }}" class="flex-1 sm:flex-none px-4 py-2.5 bg-blue-600 text-white hover:bg-blue-700 font-bold rounded-xl transition-colors flex items-center justify-center text-sm shadow-sm">
+                        <i class="fa-solid fa-list mr-2"></i> Kelola Semua
+                    </a>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50/50 dark:bg-slate-800/50 text-[11px] text-gray-400 dark:text-gray-500 uppercase tracking-wider transition-colors">
+                            <th class="px-6 py-4 font-semibold">Kode Transaksi</th>
+                            <th class="px-6 py-4 font-semibold">Pelanggan</th>
+                            <th class="px-6 py-4 font-semibold">Waktu Masuk</th>
+                            <th class="px-6 py-4 font-semibold text-center">Status</th>
+                            <th class="px-6 py-4 font-semibold text-right">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm text-gray-600 dark:text-gray-300 divide-y divide-gray-100 dark:divide-slate-800/80">
+                        @forelse($antrianPesananOnline as $trx)
+                            <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors {{ $trx->status === 'Diproses' ? 'bg-blue-50/30 dark:bg-blue-900/10' : '' }}">
+                                <td class="px-6 py-4">
+                                    <div class="font-black text-sm {{ $trx->status === 'Diproses' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-800 dark:text-white' }}">
+                                        {{ $trx->kode_transaksi }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 font-medium text-gray-800 dark:text-white">
+                                    {{ $trx->pelanggan->nama_lengkap ?? $trx->nama_pelanggan }}
+                                </td>
+                                <td class="px-6 py-4 text-xs text-gray-500 dark:text-gray-400">
+                                    <i class="fa-regular fa-clock mr-1"></i> {{ \Carbon\Carbon::parse($trx->created_at)->diffForHumans() }}
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    @if($trx->status === 'Menunggu')
+                                        <span class="bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-400 px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-colors inline-flex items-center">
+                                            Menunggu
+                                        </span>
+                                    @elseif($trx->status === 'Diproses')
+                                        <span class="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-colors inline-flex items-center">
+                                            <i class="fa-solid fa-spinner animate-spin mr-1"></i> Diproses
+                                        </span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex justify-end space-x-2">
+                                        @if($trx->status === 'Menunggu')
+                                            <form action="{{ route('kasir.pesanan.updateStatus', $trx->id) }}" method="POST">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input type="hidden" name="status" value="Diproses">
+                                                <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs shadow-sm transition-transform transform hover:-translate-y-0.5 flex items-center">
+                                                    <i class="fa-solid fa-print mr-1.5"></i> Proses
+                                                </button>
+                                            </form>
+                                        @elseif($trx->status === 'Diproses')
+                                            <form action="{{ route('kasir.pesanan.updateStatus', $trx->id) }}" method="POST">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input type="hidden" name="status" value="Siap Diambil">
+                                                <button type="submit" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg text-xs shadow-sm transition-transform transform hover:-translate-y-0.5 flex items-center">
+                                                    <i class="fa-solid fa-check mr-1.5"></i> Selesai
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
+                                    <div class="flex flex-col items-center justify-center">
+                                        <div class="w-16 h-16 bg-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-3">
+                                            <i class="fa-solid fa-cloud-arrow-down text-2xl text-gray-400 dark:text-gray-500"></i>
+                                        </div>
+                                        <p class="font-medium text-gray-600 dark:text-gray-300">Tidak ada pesanan online</p>
+                                        <p class="text-xs mt-1">Belum ada pesanan masuk hari ini.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden transition-colors">
             <div class="px-6 py-5 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center transition-colors">
                 <div>

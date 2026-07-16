@@ -150,6 +150,7 @@ class PosController extends Controller
                     'id_transaksi' => $id_transaksi,
                     'tipe_item' => ucfirst($item['tipe']),
                     'id_item' => $item['id'],
+                    'nama_item' => $item['nama'] ?? 'Item',
                     'harga_satuan' => $item['harga'],
                     'qty' => $item['qty'],
                     'subtotal' => $item['harga'] * $item['qty'],
