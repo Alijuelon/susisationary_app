@@ -3,19 +3,21 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Pesanan;
+use App\Models\Transaksi;
+use App\Models\DetailTransaksi;
 use App\Models\User;
 use App\Models\Layanan;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
-class PesananSeeder extends Seeder
+class TransaksiSeeder extends Seeder
 {
     public function run(): void
     {
-        $pelanggans = User::where('role', 'pelanggan')->pluck('id')->toArray();
-        $layanans = Layanan::pluck('id')->toArray();
+        $pelanggans = User::where('role', 'pelanggan')->get();
+        $layanans = Layanan::all();
         
-        if (empty($pelanggans) || empty($layanans)) {
+        if ($pelanggans->isEmpty() || $layanans->isEmpty()) {
             return;
         }
 
@@ -37,35 +39,48 @@ class PesananSeeder extends Seeder
             ['pelanggan' => 2, 'layanan' => 0, 'status' => 'Siap Diambil', 'time' => $now->copy()->subHours(4), 'catatan' => 'Nanti sore saya ambil.'],
             ['pelanggan' => 3, 'layanan' => 7, 'status' => 'Siap Diambil', 'time' => $now->copy()->subHours(5), 'catatan' => 'Foto paspor ukuran 4x6, 10 lembar.'],
 
-            // Status Selesai
-            ['pelanggan' => 4, 'layanan' => 1, 'status' => 'Selesai', 'time' => $now->copy()->subDays(1), 'catatan' => 'Sudah diambil dan dibayar.'],
-            ['pelanggan' => 0, 'layanan' => 8, 'status' => 'Selesai', 'time' => $now->copy()->subDays(2), 'catatan' => 'Poster event lomba anak.'],
+            // Status Berhasil (Checkout Kasir)
+            ['pelanggan' => 4, 'layanan' => 1, 'status' => 'Berhasil', 'time' => $now->copy()->subDays(1), 'catatan' => 'Sudah diambil dan dibayar.'],
+            ['pelanggan' => 0, 'layanan' => 8, 'status' => 'Berhasil', 'time' => $now->copy()->subDays(2), 'catatan' => 'Poster event lomba anak.'],
             
             // Status Dibatalkan
             ['pelanggan' => 1, 'layanan' => 2, 'status' => 'Dibatalkan', 'time' => $now->copy()->subDays(3), 'catatan' => 'Maaf salah file, saya cancel dulu.'],
         ];
 
         foreach ($pesanans as $p) {
-            $id_pelanggan = $pelanggans[$p['pelanggan'] % count($pelanggans)];
-            $id_layanan = $layanans[$p['layanan'] % count($layanans)];
+            $pelanggan = $pelanggans[$p['pelanggan'] % $pelanggans->count()];
+            $layanan = $layanans[$p['layanan'] % $layanans->count()];
 
-            // Create a dummy document file entry
+            $kodeUnik = 'TRX-' . $p['time']->format('Ymd') . '-' . strtoupper(Str::random(5));
             $file_dokumen = 'dokumen_pesanan/dummy_' . time() . rand(100, 999) . '.pdf';
+            
+            $transaksi = Transaksi::create([
+                'kode_transaksi'    => $kodeUnik,
+                'id_pelanggan'      => $pelanggan->id,
+                'tipe_transaksi'    => 'Online',
+                'status'            => $p['status'],
+                'nama_pelanggan'    => $pelanggan->nama_lengkap ?? $pelanggan->name,
+                'total_harga'       => $layanan->harga_satuan,
+                'uang_bayar'        => $p['status'] === 'Berhasil' ? $layanan->harga_satuan : 0,
+                'kembalian'         => 0,
+                'metode_pembayaran' => 'Cash',
+                'created_at'        => $p['time'],
+                'updated_at'        => $p['time'],
+            ]);
 
-            $pesanan = Pesanan::create([
-                'id_pelanggan' => $id_pelanggan,
-                'id_layanan'   => $id_layanan,
+            DetailTransaksi::create([
+                'id_transaksi' => $transaksi->id,
+                'tipe_item'    => 'Layanan',
+                'id_item'      => $layanan->id,
+                'nama_item'    => $layanan->nama_layanan,
+                'harga_satuan' => $layanan->harga_satuan,
+                'qty'          => 1,
+                'subtotal'     => $layanan->harga_satuan,
                 'file_dokumen' => $file_dokumen,
                 'catatan'      => $p['catatan'],
-                'status'       => $p['status'],
                 'created_at'   => $p['time'],
                 'updated_at'   => $p['time'],
             ]);
-            
-            // Untuk memastikan urutan queue berfungsi, karena created_at bisa ditimpa Eloquent saat create
-            $pesanan->created_at = $p['time'];
-            $pesanan->updated_at = $p['time'];
-            $pesanan->save(['timestamps' => false]);
         }
     }
 }

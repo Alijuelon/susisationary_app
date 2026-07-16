@@ -23,6 +23,7 @@ return new class extends Migration
 
         // 2. Detail Transaksi alterations
         Schema::table('detail_transaksi', function (Blueprint $table) {
+            $table->string('nama_item', 255)->nullable()->after('id_item');
             $table->string('file_dokumen')->nullable()->after('subtotal');
             $table->text('catatan')->nullable()->after('file_dokumen');
         });
@@ -46,7 +47,7 @@ return new class extends Migration
         Schema::dropIfExists('detail_transaksi_opsi');
 
         Schema::table('detail_transaksi', function (Blueprint $table) {
-            $table->dropColumn(['file_dokumen', 'catatan']);
+            $table->dropColumn(['nama_item', 'file_dokumen', 'catatan']);
         });
 
         Schema::table('transaksi', function (Blueprint $table) {

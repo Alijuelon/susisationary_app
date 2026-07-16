@@ -21,21 +21,20 @@ class PesananOnlineController extends Controller
         return view('pelanggan.pesanan.create', compact('layanan'));
     }
 
-    // Memproses unggahan file dan menyimpan pesanan
     public function store(Request $request)
     {
         $request->validate([
-            'items'                     => 'required|array|min:1',
-            'items.*.id_layanan'        => 'required|exists:layanans,id',
-            'items.*.file_dokumen'      => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',
-            'items.*.jumlah_rangkap'    => 'required|integer|min:1',
-            'items.*.catatan_tambahan'  => 'nullable|string|max:500',
-            'items.*.opsi'              => 'nullable|array',
-            'items.*.opsi.*'            => 'exists:opsi_layanans,id',
+            'id_layanans'        => 'required|array|min:1',
+            'id_layanans.*'      => 'required|exists:layanans,id',
+            'file_dokumen'       => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',
+            'jumlah_rangkap'     => 'required|integer|min:1',
+            'catatan_tambahan'   => 'nullable|string|max:500',
+            'opsi'               => 'nullable|array',
+            'opsi.*'             => 'exists:opsi_layanans,id',
         ], [
-            'items.*.file_dokumen.mimes' => 'Format file harus PDF, Word, atau Gambar.',
-            'items.*.file_dokumen.max'   => 'Ukuran file maksimal adalah 5MB.',
-            'items.required'             => 'Minimal pilih 1 layanan.',
+            'file_dokumen.mimes' => 'Format file harus PDF, Word, atau Gambar.',
+            'file_dokumen.max'   => 'Ukuran file maksimal adalah 5MB.',
+            'id_layanans.required' => 'Minimal pilih 1 layanan.',
         ]);
 
         DB::beginTransaction();
@@ -55,22 +54,27 @@ class PesananOnlineController extends Controller
                 'metode_pembayaran' => 'Cash',
             ]);
 
-            foreach ($request->items as $itemData) {
-                $layanan = Layanan::findOrFail($itemData['id_layanan']);
-                $filePath = $itemData['file_dokumen']->store('dokumen_pesanan', 'public');
+            $filePath = $request->file('file_dokumen')->store('dokumen_pesanan', 'public');
+            $qty = $request->jumlah_rangkap;
+
+            foreach ($request->id_layanans as $layananId) {
+                $layanan = Layanan::findOrFail($layananId);
                 
                 $hargaSatuan = $layanan->harga_satuan;
                 $opsiDibeli = [];
 
-                if (isset($itemData['opsi'])) {
-                    $opsiList = \App\Models\OpsiLayanan::whereIn('id', $itemData['opsi'])->get();
+                if ($request->has('opsi')) {
+                    // Hanya proses opsi yang benar-benar dimiliki oleh layanan ini
+                    $opsiList = \App\Models\OpsiLayanan::whereIn('id', $request->opsi)
+                                ->where('id_layanan', $layanan->id)
+                                ->get();
+                                
                     foreach ($opsiList as $o) {
                         $hargaSatuan += $o->harga;
                         $opsiDibeli[] = $o;
                     }
                 }
 
-                $qty = $itemData['jumlah_rangkap'];
                 $subtotal = $hargaSatuan * $qty;
                 $totalTransaksi += $subtotal;
 
@@ -83,7 +87,7 @@ class PesananOnlineController extends Controller
                     'qty'          => $qty,
                     'subtotal'     => $subtotal,
                     'file_dokumen' => $filePath,
-                    'catatan'      => $itemData['catatan_tambahan'] ?? null,
+                    'catatan'      => $request->catatan_tambahan,
                 ]);
 
                 foreach ($opsiDibeli as $o) {

@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             BarangSeeder::class,
             LayananSeeder::class,
-            PesananSeeder::class,
+            TransaksiSeeder::class,
         ]);
 
         \App\Models\Pengaturan::firstOrCreate([
