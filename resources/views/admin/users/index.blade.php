@@ -5,8 +5,10 @@
         showCreateModal: false, 
         showEditModal: false, 
         showDeleteModal: false,
+        showToggleModal: false,
         editUser: { id: '', nama_lengkap: '', email: '', role: '', password: '' },
         deleteItem: { name: '', url: '' },
+        toggleItem: { name: '', url: '', actionText: '', actionTitle: '', is_active: false },
         selectedIds: [],
         openEdit(user) {
             this.editUser = { id: user.id, nama_lengkap: user.nama_lengkap, email: user.email, role: user.role, password: '' };
@@ -15,8 +17,17 @@
         openDeleteModal(name, url) {
             this.deleteItem = { name: name, url: url };
             this.showDeleteModal = true;
+        },
+        openToggleModal(name, url, is_active) {
+            this.toggleItem = { 
+                name: name, 
+                url: url, 
+                actionText: is_active ? 'Nonaktifkan' : 'Aktifkan',
+                actionTitle: is_active ? 'Konfirmasi Nonaktifkan' : 'Konfirmasi Aktifkan',
+                is_active: is_active
+            };
+            this.showToggleModal = true;
         }
-    }">
     }">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
             <div>
@@ -61,17 +72,7 @@
             </form>
         </div>
 
-        @if(session('success'))
-            <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)" class="mb-6 bg-green-500 text-white px-5 py-4 rounded-xl shadow-md flex items-center justify-between transition-all">
-                <div class="flex items-center space-x-3">
-                    <i class="fa-solid fa-circle-check text-xl"></i>
-                    <p class="font-bold text-sm">{{ session('success') }}</p>
-                </div>
-                <button @click="show = false" class="text-white hover:text-green-200">
-                    <i class="fa-solid fa-times"></i>
-                </button>
-            </div>
-        @endif
+
 
         @if(session('error'))
             <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" class="mb-6 bg-red-500 dark:bg-red-600 text-white px-5 py-4 rounded-xl shadow-md flex items-center justify-between transition-all">
@@ -147,16 +148,11 @@
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end space-x-2">
                                         @if($user->id !== auth()->id())
-                                            <form action="{{ route('admin.users.toggle-status', $user->id) }}" method="POST"
-                                                onsubmit="return confirm('{{ $user->is_active ? 'Nonaktifkan' : 'Aktifkan' }} user {{ $user->nama_lengkap }}?')">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button type="submit"
-                                                    class="w-8 h-8 flex items-center justify-center rounded-lg {{ $user->is_active ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/50' : 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/50' }} transition-colors"
-                                                    title="{{ $user->is_active ? 'Nonaktifkan Akun' : 'Aktifkan Akun' }}">
-                                                    <i class="fa-solid {{ $user->is_active ? 'fa-user-slash' : 'fa-user-check' }} text-xs"></i>
-                                                </button>
-                                            </form>
+                                            <button type="button" @click="openToggleModal('{{ addslashes($user->nama_lengkap) }}', '{{ route('admin.users.toggle-status', $user->id) }}', {{ $user->is_active ? 'true' : 'false' }})"
+                                                class="w-8 h-8 flex items-center justify-center rounded-lg {{ $user->is_active ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/50' : 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/50' }} transition-colors"
+                                                title="{{ $user->is_active ? 'Nonaktifkan Akun' : 'Aktifkan Akun' }}">
+                                                <i class="fa-solid {{ $user->is_active ? 'fa-user-slash' : 'fa-user-check' }} text-xs"></i>
+                                            </button>
                                         @endif
                                         
                                         <button @click="openEdit({{ $user->toJson() }})"
@@ -264,7 +260,7 @@
                         <h3 class="text-lg font-bold text-gray-800 dark:text-white"><i class="fa-solid fa-pen-to-square mr-2 text-blue-500"></i>Edit User</h3>
                     </div>
 
-                    <form method="POST" :action="'{{ url('admin/users') }}/' + editUser.id">
+                    <form method="POST" :action="`{{ url('admin/users') }}/${editUser.id}`">
                         @csrf
                         @method('PUT')
                         <div class="px-6 py-5 space-y-4">
@@ -294,6 +290,43 @@
                             <button type="submit" class="px-5 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-md transition-all text-sm">Perbarui</button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+
+        {{-- MODAL TOGGLE STATUS --}}
+        <div x-show="showToggleModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                
+                <div x-show="showToggleModal" x-transition.opacity class="fixed inset-0 bg-gray-900 bg-opacity-60 dark:bg-opacity-80 transition-opacity" @click="showToggleModal = false" aria-hidden="true"></div>
+
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+                <div x-show="showToggleModal" 
+                     x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
+                     x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                     class="inline-block align-bottom bg-white dark:bg-slate-900 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-sm w-full border border-gray-100 dark:border-slate-800">
+                    
+                    <div class="px-6 py-6 text-center">
+                        <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white dark:border-slate-800 shadow-sm transition-colors"
+                             :class="toggleItem.is_active ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-500' : 'bg-green-100 dark:bg-green-900/40 text-green-500'">
+                            <i class="fa-solid text-2xl" :class="toggleItem.is_active ? 'fa-user-slash' : 'fa-user-check'"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2" x-text="toggleItem.actionTitle"></h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Apakah Anda yakin ingin <span class="font-bold" x-text="toggleItem.actionText.toLowerCase()"></span> user <br><span class="font-bold text-gray-800 dark:text-gray-200" x-text="toggleItem.name"></span>?</p>
+                    </div>
+
+                    <div class="px-6 py-4 bg-gray-50 dark:bg-slate-800/80 flex justify-center space-x-3 rounded-b-2xl border-t border-gray-100 dark:border-slate-800 transition-colors">
+                        <button type="button" @click="showToggleModal = false" class="w-1/2 px-5 py-2.5 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors text-sm">Batal</button>
+                        
+                        <form x-bind:action="toggleItem.url" method="POST" class="w-1/2 m-0">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit" class="w-full px-5 py-2.5 text-white rounded-xl font-bold shadow-md transition-colors text-sm"
+                                    :class="toggleItem.is_active ? 'bg-amber-500 hover:bg-amber-600' : 'bg-green-600 hover:bg-green-700'"
+                                    x-text="'Ya, ' + toggleItem.actionText"></button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

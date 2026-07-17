@@ -103,8 +103,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Kelola Pengguna
     Route::delete('/users/bulk', [UserManagementController::class, 'destroyBulk'])->name('users.destroyBulk');
-    Route::resource('users', UserManagementController::class)->except(['show', 'create']);
     Route::patch('users/{id}/toggle-status', [UserManagementController::class, 'toggleStatus'])->name('users.toggle-status');
+    Route::resource('users', UserManagementController::class)->except(['show', 'create']);
 
     // Kelola Keanggotaan (Membership)
     Route::delete('/membership/bulk', [AdminMembershipController::class, 'destroyBulk'])->name('membership.destroyBulk');
