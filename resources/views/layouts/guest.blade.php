@@ -6,6 +6,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ $title ?? 'Susi Stationary' }}</title>
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/jpeg" href="{{ asset('images/susi_logo.jpg') }}">
 
     <script>
         // Setel 'dark' class secepat mungkin sebelum DOM render (mencegah white flash)
